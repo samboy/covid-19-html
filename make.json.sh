@@ -1,5 +1,15 @@
 #!/bin/bash
 
+# This is a BASH (actually, Posix SH) script to make a JSON file from
+# the CSV file for county data which The New York Times has provided
+# at https://github.com/nytimes/covid-19-data/
+#
+# This script needs POSIX-compatible UNIX-like tools (Linux, MacOS, 
+# Windows with Cygwin) and the "git" tool to pull the data from 
+# upstream
+#
+# This script outputs JSON on the standard output
+
 REPO="$1"
 if [ -z "$REPO" ] ; then
 	REPO="https://github.com/nytimes/covid-19-data/"
