@@ -19,8 +19,7 @@ cp us-counties.csv ../data.csv
 cd ..
 
 grep $COUNTY data.csv | awk -F, '
-    BEGIN{print "<table><tr><th>Date</th><th>Cases</th>"
-          print "<th>Average Growth</th></tr>"}
+    BEGIN{print "Date,Cases,Average Growth"}
     {
     # Calculate raw growth
     if(last){growth = $5 / last}
@@ -31,10 +30,9 @@ grep $COUNTY data.csv | awk -F, '
     growth = filter
 
     # Convert growth in to percent string
-    if(growth>=1){growth = (growth - 1)*100;growth=sprintf("%1f%%",growth)}
-    else{growth="None"}
+    if(growth>=1){growth = (growth - 1)*100;growth=sprintf("%1f",growth)}
+    else{growth="0"}
 
-    print "<tr>" $1 "</tr><tr>" $5 "</tr><tr>" growth "</tr>"
+    print $1 "," $5 "," growth
     }
-    END {print "</table>"}
 '
