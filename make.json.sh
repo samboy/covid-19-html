@@ -9,6 +9,9 @@
 # upstream
 #
 # This script outputs JSON on the standard output
+# The JSON is in this form:
+# {state name}.{county name}.{date}.deaths
+# {state name}.{county name}.{date}.cases
 
 REPO="$1"
 if [ -z "$REPO" ] ; then
