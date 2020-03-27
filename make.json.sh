@@ -29,7 +29,7 @@ cat data.csv | awk -F, '
         print "{"
   }
 
-  {
+  /202/ {
     date = $1
     county = $2
     state = $3
@@ -77,5 +77,6 @@ cat data.csv | awk -F, '
             printf("\n\t}")
         }
         print ""
+        print "}"
   }
 '
