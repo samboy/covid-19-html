@@ -1,0 +1,71 @@
+#!/bin/bash
+
+REPO="$1"
+if [ -z "$REPO" ] ; then
+	REPO="https://github.com/nytimes/covid-19-data/"
+fi
+
+DIR=$( echo $REPO | cut -f5 -d/ )
+if [ ! -e "$DIR" ] ; then
+	git clone $REPO > /dev/null 2>&1
+fi
+cd $DIR
+git pull origin master > /dev/null 2>&1
+cp us-counties.csv ../data.csv
+cd ..
+
+cat data.csv | awk -F, '
+  BEGIN {
+	print "{"
+  }
+
+  {
+    date = $1
+    county = $2
+    state = $3
+    fips = $4
+    cases = $5
+    deaths = $6
+
+    if(stateCounty[state "," county] == 0) {
+	if(states[state]) {
+		states[state] = states[state] "," county
+        } else {
+		states[state] = county
+        }
+    }
+    if(stateCounty[state "," county]) {
+	stateCounty[state "," county] = stateCounty[state "," county] "," date
+    } else {
+	stateCounty[state "," county] = date
+    }
+    scd = "\"cases\": " cases ", \"deaths\": " deaths 
+    stateCountyDate[state "," county "," date] = scd
+  }
+
+  END {
+	for(state in states) {
+	    if(snext) {print ","} else {snext=1}
+	    print "\t\"" state "\": {"
+	    split(states[state],counties)
+            for(num in counties) {
+	        if(cnext) {print ","} else {cnext=1}
+		county = counties[num]
+		print"\t\t\"" county "\" : {"
+		split(stateCounty[state "," county],countyDates)
+                for(dindex in countyDates) {
+	            if(dnext) {print ","} else {dnext=1}
+		    date = countyDates[dindex]
+		    print "\t\t\t\"" date "\" : {"
+		    print "\t\t\t\t" stateCountyDate[state "," county "," date]
+		    printf("\t\t\t}")
+		}
+	        dnext = 0
+	        printf("\n\t\t}")
+	    }
+            cnext = 0
+	    printf("\n\t}")
+	}
+        print ""
+  }
+'
