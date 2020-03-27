@@ -75,3 +75,7 @@ to be loaded</noscript>
 </body></html>
 ```
 
+# Attribution
+
+The data used here is provided by 
+[The New York Times](https://github.com/nytimes/covid-19-data).
