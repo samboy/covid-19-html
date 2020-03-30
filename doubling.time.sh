@@ -1,14 +1,18 @@
 #!/bin/sh
 
+# Calculate the doubling time for San Diego county
+
 echo Date '     ' Doubling time \(days\)
 grep 'San Diego' data.csv | awk -F, '
 {
 	v = 7; # Get the average growth for the last seven days
-	n = n+1;
+	n = n + 1;
 	this = $5;
-	if(last>0) {
-		growth=this/last;
-		list[n%v]=growth
+	if(last > 0) {
+		growth = this / last;
+		list[n%v] = growth
+	} else {
+		list[n%v] = 0
 	}
 	sum = 0;
 	for(a=0;a<v;a++) {
