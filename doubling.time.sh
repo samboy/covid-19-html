@@ -7,9 +7,9 @@ grep 'San Diego' data.csv | awk -F, '
 {
 	v = 7; # Get the average growth for the last seven days
 	n = n + 1;
-	this = $5;
+	cases = $5;
 	if(last > 0) {
-		growth = this / last;
+		growth = cases / last;
 		list[n%v] = growth
 	} else {
 		list[n%v] = 0
@@ -18,8 +18,8 @@ grep 'San Diego' data.csv | awk -F, '
 	for(a=0;a<v;a++) {
 		sum += list[a]
 	}
-	if(log(sum/v) > 0 && this>10) {
-		print $1 " " log(2)/log(sum/v)
+	if(log(sum/v) > 0 && cases > 10) {
+		printf("%s %f %d\n",$1,log(2)/log(sum/v),cases)
 	}
-	last = this
+	last = cases
 }'
