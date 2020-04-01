@@ -1,11 +1,17 @@
 #!/bin/sh
 
+# Determine how many days we average the growth for
+DAYRANGE="$1"
+if [ -z "$DAYRANGE" ] ; then
+	DAYRANGE=7
+fi
+
 # Calculate the doubling time for San Diego county
 
 echo Date '     ' Doubling time \(days\)
 grep 'San Diego' data.csv | awk -F, '
 {
-	v = 7; # Get the average growth for the last seven days
+	v = '$DAYRANGE'; # Get the average growth for the last DAYRANGE days
 	n = n + 1;
 	cases = $5;
 	if(last > 0) {
