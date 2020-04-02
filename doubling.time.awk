@@ -3,7 +3,7 @@
 {
 	v = 7; 
 	n = n + 1;
-	cases = $1;
+	cases = $1 + 0;
 	if(last > 0) {
 		growth = cases / last;
 		list[n%v] = growth
