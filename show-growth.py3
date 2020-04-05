@@ -57,22 +57,26 @@ output = {}
 for state in countyGrowth.keys():
     for county in countyGrowth[state].keys():
         thisCases = casesMostRecent[state][county]
-        if(countyGrowth[state][county] > 1):
-            doublingDays = log(2)/log(countyGrowth[state][county])
+        thisGrowth = countyGrowth[state][county]
+        if(thisGrowth > 1):
+            doublingDays = log(2)/log(thisGrowth)
         else:
             doublingDays = 0 
+        thisMagicNumber = thisCases * (thisGrowth ** 14)
         line = (str(doublingDays) + "," + str(thisCases) +
-                "," + county + "," + state) 
-        if doublingDays in output:
-            if thisCases in output[doublingDays]:
-                output[doublingDays][thisCases].append(line)
+                "," + str(thisMagicNumber) + "," + county + "," + 
+                state) 
+        if thisCases > 250:
+            if thisMagicNumber in output:
+                if thisCases in output[thisMagicNumber]:
+                    output[thisMagicNumber][thisCases].append(line)
+                else:
+                    output[thisMagicNumber][thisCases] = [line]
             else:
-                output[doublingDays][thisCases] = [line]
-        else:
-            output[doublingDays] = {}
-            output[doublingDays][thisCases] = [line]
+                output[thisMagicNumber] = {}
+                output[thisMagicNumber][thisCases] = [line]
 
-for doublingDays in sorted(output.keys()):
-    for thisCases in sorted(output[doublingDays].keys()):
-        for line in sorted(output[doublingDays][thisCases]):
+for thisMagicNumber in sorted(output.keys()):
+    for thisCases in sorted(output[thisMagicNumber].keys()):
+        for line in sorted(output[thisMagicNumber][thisCases]):
             print(line)
