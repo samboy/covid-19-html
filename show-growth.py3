@@ -6,10 +6,14 @@
 # cat covid-19-byCounty.json | ./show-growth.py3
 
 # The output format is a comma separated list:
-# doubling days, number of cases (most recent), projected cases, county, state
+# date, predicted cases, predicted doubling days, number of cases, 
+# .... projected cases, county, state
+# Here, predicted cases is the number of cases this county was projected to 
+# have a week before; projected cases is the number of cases we think this
+# county will have in seven days
 
 growthDaysToAverage = 7
-casesThreshold = 1000
+casesThreshold = 100
 lookAtDeaths = False
 
 import sys, json
@@ -17,6 +21,19 @@ from math import log
 from datetime import date
 import time
 
+# Given a "theDay" in the form "2020-04-05", and the number of days
+# to move it (positive in the future, negative in the past), move it
+# that many days.  For example, moveIsoDate("2020-04-05",-6) gives
+# us "2020-03-31"; moveIsoDate("2020-03-31",2) gives us "2020-04-02"
+def moveIsoDate(theDay,days):
+    year = int(theDay[0:4])
+    month = int(theDay[5:7])
+    day = int(theDay[8:10])
+    stamp = time.mktime((year, month, day, 0, 0, 0, 0, 0, 0))
+    movedStamp = stamp + (86400 * days)
+    return str(date.fromtimestamp(movedStamp))
+
+# Gather information about number of cases and growth rate
 j = json.loads(sys.stdin.read())
 
 # Get string date for last date in JSON and seven days ago
@@ -27,14 +44,6 @@ for state in sorted(j.keys()):
             if day > mostRecent:
                 mostRecent = day
 
-year = int(mostRecent[0:4])
-month = int(mostRecent[5:7])
-day = int(mostRecent[8:10])
-stamp = time.mktime((year, month, day, 0, 0, 0, 0, 0, 0))
-lastWeek = stamp - (86400 * 7)
-lastWeekDay = str(date.fromtimestamp(lastWeek))
-
-# Gather information about number of cases and growth rate
 countyGrowth = {}
 casesByDate = {}
 prediction = {}
@@ -69,32 +78,42 @@ for state in sorted(j.keys()):
                 averageGrowth = totalGrowth / growthDays
             else:
                 averageGrowth = 0
+            oneWeekAhead = moveIsoDate(day,7)
             if(not day in countyGrowth):
                 countyGrowth[day] = {}
                 casesByDate[day] = {}
-                prediction[day] = {}
+                prediction[oneWeekAhead] = {}
             if(not state in countyGrowth[day]):
                 countyGrowth[day][state] = {}
                 casesByDate[day][state] = {}
-                prediction[day][state] = {}
+                prediction[oneWeekAhead][state] = {}
             if growthDays >= 7:
                 countyGrowth[day][state][county] = averageGrowth
                 casesByDate[day][state][county] = cases
-                prediction[day][state][county] = cases * (averageGrowth ** 7)
+                prediction[oneWeekAhead][state][county] = (
+                        cases * (averageGrowth ** 7))
 
 output = {}
-for lookDay in [lastWeekDay, mostRecent]:
+lookAt = []
+for a in range(7):
+    lookAt.append(moveIsoDate(mostRecent, -a))
+
+for lookDay in lookAt:
     if lookDay in countyGrowth:
         for state in countyGrowth[lookDay].keys():
             for county in countyGrowth[lookDay][state].keys():
                 thisCases = casesByDate[lookDay][state][county]
                 thisGrowth = countyGrowth[lookDay][state][county]
+                try:
+                    predicted = prediction[lookDay][state][county] 
+                except:
+                    predicted = -1
                 if(thisGrowth > 1):
                     doublingDays = log(2)/log(thisGrowth)
                 else:
                     doublingDays = 0 
                 thisMagicNumber = thisCases * (thisGrowth ** 7)
-                line = (lookDay + "," + 
+                line = (lookDay + "," + str(predicted) + "," +
                     str(doublingDays) + "," + str(thisCases) +
                     "," + str(thisMagicNumber) + "," + county + "," + 
                     state) 
