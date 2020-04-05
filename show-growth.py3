@@ -37,15 +37,16 @@ lastWeekDay = str(date.fromtimestamp(lastWeek))
 # Gather information about number of cases and growth rate
 countyGrowth = {}
 casesByDate = {}
+prediction = {}
 for state in sorted(j.keys()):
     for county in sorted(j[state].keys()):
         last = 0
         averageGrowthArray = []
         arrayIndex = 0
         mostRecentCases = 0
-        for date in sorted(j[state][county].keys()):
-            cases = j[state][county][date]["cases"]
-            deaths = j[state][county][date]["deaths"]
+        for day in sorted(j[state][county].keys()):
+            cases = j[state][county][day]["cases"]
+            deaths = j[state][county][day]["deaths"]
             if lookAtDeaths:
                 cases = deaths 
             if(last > 0):
@@ -68,15 +69,18 @@ for state in sorted(j.keys()):
                 averageGrowth = totalGrowth / growthDays
             else:
                 averageGrowth = 0
-            if(not date in countyGrowth):
-                countyGrowth[date] = {}
-                casesByDate[date] = {}
-            if(not state in countyGrowth[date]):
-                countyGrowth[date][state] = {}
-                casesByDate[date][state] = {}
+            if(not day in countyGrowth):
+                countyGrowth[day] = {}
+                casesByDate[day] = {}
+                prediction[day] = {}
+            if(not state in countyGrowth[day]):
+                countyGrowth[day][state] = {}
+                casesByDate[day][state] = {}
+                prediction[day][state] = {}
             if growthDays >= 7:
-                countyGrowth[date][state][county] = averageGrowth
-                casesByDate[date][state][county] = cases
+                countyGrowth[day][state][county] = averageGrowth
+                casesByDate[day][state][county] = cases
+                prediction[day][state][county] = cases * (averageGrowth ** 7)
 
 output = {}
 for lookDay in [lastWeekDay, mostRecent]:
