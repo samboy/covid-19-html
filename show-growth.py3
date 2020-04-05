@@ -53,11 +53,26 @@ for state in sorted(j.keys()):
             countyGrowth[state][county] = averageGrowth
             casesMostRecent[state][county] = mostRecentCases
 
+output = {}
 for state in countyGrowth.keys():
     for county in countyGrowth[state].keys():
+        thisCases = casesMostRecent[state][county]
         if(countyGrowth[state][county] > 1):
             doublingDays = log(2)/log(countyGrowth[state][county])
         else:
-            doublingDays = 0
-        print(str(doublingDays) + "," + str(casesMostRecent[state][county]) +
+            doublingDays = 0 
+        line = (str(doublingDays) + "," + str(thisCases) +
                 "," + county + "," + state) 
+        if doublingDays in output:
+            if thisCases in output[doublingDays]:
+                output[doublingDays][thisCases].append(line)
+            else:
+                output[doublingDays][thisCases] = [line]
+        else:
+            output[doublingDays] = {}
+            output[doublingDays][thisCases] = [line]
+
+for doublingDays in sorted(output.keys()):
+    for thisCases in sorted(output[doublingDays].keys()):
+        for line in sorted(output[doublingDays][thisCases]):
+            print(line)
