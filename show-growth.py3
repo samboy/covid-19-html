@@ -6,12 +6,14 @@
 # cat covid-19-byCounty.json | ./show-growth.py3
 
 # The output format is a comma separated list:
-# doubling days, number of cases (most recent), county, state
+# doubling days, number of cases (most recent), projected cases, county, state
+
+growthDaysToAverage = 7
+casesThreshold = 1000
+lookAtDeaths = False
 
 import sys, json
 from math import log
-
-growthDaysToAverage = 7
 
 j = json.loads(sys.stdin.read())
 countyGrowth = {}
@@ -25,6 +27,8 @@ for state in sorted(j.keys()):
         for date in sorted(j[state][county].keys()):
             cases = j[state][county][date]["cases"]
             deaths = j[state][county][date]["deaths"]
+            if lookAtDeaths:
+                cases = deaths 
             if(last > 0):
                 growthToday = cases / last
             else:
@@ -66,7 +70,7 @@ for state in countyGrowth.keys():
         line = (str(doublingDays) + "," + str(thisCases) +
                 "," + str(thisMagicNumber) + "," + county + "," + 
                 state) 
-        if thisCases > 250:
+        if thisCases > casesThreshold:
             if thisMagicNumber in output:
                 if thisCases in output[thisMagicNumber]:
                     output[thisMagicNumber][thisCases].append(line)
