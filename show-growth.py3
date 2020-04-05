@@ -32,6 +32,7 @@ for state in sorted(j.keys()):
             if(len(averageGrowthArray) <= (arrayIndex % growthDaysToAverage)):
                 averageGrowthArray.append(0)
             averageGrowthArray[arrayIndex % growthDaysToAverage] = growthToday
+            arrayIndex = arrayIndex + 1
             last = cases
             mostRecentCases = cases
 
@@ -48,8 +49,9 @@ for state in sorted(j.keys()):
         if(not state in countyGrowth):
             countyGrowth[state] = {}
             casesMostRecent[state] = {}
-        countyGrowth[state][county] = averageGrowth
-        casesMostRecent[state][county] = mostRecentCases
+        if growthDays >= 7:
+            countyGrowth[state][county] = averageGrowth
+            casesMostRecent[state][county] = mostRecentCases
 
 for state in countyGrowth.keys():
     for county in countyGrowth[state].keys():
