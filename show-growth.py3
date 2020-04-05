@@ -14,10 +14,29 @@ lookAtDeaths = False
 
 import sys, json
 from math import log
+from datetime import date
+import time
 
 j = json.loads(sys.stdin.read())
+
+# Get string date for last date in JSON and seven days ago
+mostRecent="0000-00-00"
+for state in sorted(j.keys()):
+    for county in sorted(j[state].keys()):
+        for day in sorted(j[state][county].keys()):
+            if day > mostRecent:
+                mostRecent = day
+
+year = int(mostRecent[0:4])
+month = int(mostRecent[5:7])
+day = int(mostRecent[8:10])
+stamp = time.mktime((year, month, day, 0, 0, 0, 0, 0, 0))
+lastWeek = stamp - (86400 * 7)
+lastWeekDay = str(date.fromtimestamp(lastWeek))
+
+# Gather information about number of cases and growth rate
 countyGrowth = {}
-casesMostRecent = {}
+casesByDate = {}
 for state in sorted(j.keys()):
     for county in sorted(j[state].keys()):
         last = 0
@@ -38,47 +57,52 @@ for state in sorted(j.keys()):
             averageGrowthArray[arrayIndex % growthDaysToAverage] = growthToday
             arrayIndex = arrayIndex + 1
             last = cases
-            mostRecentCases = cases
 
-        # Figure out the n-day average growth for this county
-        totalGrowth = 0
-        growthDays = 0
-        for singleGrowth in averageGrowthArray:
-            growthDays = growthDays + 1
-            totalGrowth = totalGrowth + singleGrowth
-        if growthDays > 0:
-            averageGrowth = totalGrowth / growthDays
-        else:
-            averageGrowth = 0
-        if(not state in countyGrowth):
-            countyGrowth[state] = {}
-            casesMostRecent[state] = {}
-        if growthDays >= 7:
-            countyGrowth[state][county] = averageGrowth
-            casesMostRecent[state][county] = mostRecentCases
+            # Figure out the n-day average growth for this county
+            totalGrowth = 0
+            growthDays = 0
+            for singleGrowth in averageGrowthArray:
+                growthDays = growthDays + 1
+                totalGrowth = totalGrowth + singleGrowth
+            if growthDays > 0:
+                averageGrowth = totalGrowth / growthDays
+            else:
+                averageGrowth = 0
+            if(not date in countyGrowth):
+                countyGrowth[date] = {}
+                casesByDate[date] = {}
+            if(not state in countyGrowth[date]):
+                countyGrowth[date][state] = {}
+                casesByDate[date][state] = {}
+            if growthDays >= 7:
+                countyGrowth[date][state][county] = averageGrowth
+                casesByDate[date][state][county] = cases
 
 output = {}
-for state in countyGrowth.keys():
-    for county in countyGrowth[state].keys():
-        thisCases = casesMostRecent[state][county]
-        thisGrowth = countyGrowth[state][county]
-        if(thisGrowth > 1):
-            doublingDays = log(2)/log(thisGrowth)
-        else:
-            doublingDays = 0 
-        thisMagicNumber = thisCases * (thisGrowth ** 14)
-        line = (str(doublingDays) + "," + str(thisCases) +
-                "," + str(thisMagicNumber) + "," + county + "," + 
-                state) 
-        if thisCases > casesThreshold:
-            if thisMagicNumber in output:
-                if thisCases in output[thisMagicNumber]:
-                    output[thisMagicNumber][thisCases].append(line)
+for lookDay in [lastWeekDay, mostRecent]:
+    if lookDay in countyGrowth:
+        for state in countyGrowth[lookDay].keys():
+            for county in countyGrowth[lookDay][state].keys():
+                thisCases = casesByDate[lookDay][state][county]
+                thisGrowth = countyGrowth[lookDay][state][county]
+                if(thisGrowth > 1):
+                    doublingDays = log(2)/log(thisGrowth)
                 else:
-                    output[thisMagicNumber][thisCases] = [line]
-            else:
-                output[thisMagicNumber] = {}
-                output[thisMagicNumber][thisCases] = [line]
+                    doublingDays = 0 
+                thisMagicNumber = thisCases * (thisGrowth ** 7)
+                line = (lookDay + "," + 
+                    str(doublingDays) + "," + str(thisCases) +
+                    "," + str(thisMagicNumber) + "," + county + "," + 
+                    state) 
+                if thisCases > casesThreshold:
+                    if thisMagicNumber in output:
+                        if thisCases in output[thisMagicNumber]:
+                            output[thisMagicNumber][thisCases].append(line)
+                        else:
+                            output[thisMagicNumber][thisCases] = [line]
+                    else:
+                        output[thisMagicNumber] = {}
+                        output[thisMagicNumber][thisCases] = [line]
 
 for thisMagicNumber in sorted(output.keys()):
     for thisCases in sorted(output[thisMagicNumber].keys()):
