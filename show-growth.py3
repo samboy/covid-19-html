@@ -79,6 +79,7 @@ for state in sorted(j.keys()):
             else:
                 averageGrowth = 0
             oneWeekAhead = moveIsoDate(day,7)
+            yesterday = moveIsoDate(day,-1)
             if(not day in countyGrowth):
                 countyGrowth[day] = {}
                 casesByDate[day] = {}
@@ -87,11 +88,21 @@ for state in sorted(j.keys()):
                 countyGrowth[day][state] = {}
                 casesByDate[day][state] = {}
                 prediction[oneWeekAhead][state] = {}
-            if growthDays >= 7:
+            if growthDays >= growthDaysToAverage:
                 countyGrowth[day][state][county] = averageGrowth
+                try:
+                    growthDelta = (averageGrowth /
+                            countyGrowth[yesterday][state][county] )
+                except:
+                    growthDelta = 1
                 casesByDate[day][state][county] = cases
-                prediction[oneWeekAhead][state][county] = (
-                        cases * (averageGrowth ** 7))
+                iPredict = cases
+                zab = 1
+                for zaa in range(7):
+                    iPredict = iPredict * averageGrowth * zab
+                    zab *= growthDelta
+                print(str(growthDelta) + " " + county)
+                prediction[oneWeekAhead][state][county] = iPredict
 
 output = {}
 lookAt = []
