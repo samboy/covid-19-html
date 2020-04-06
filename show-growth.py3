@@ -91,8 +91,10 @@ for state in sorted(j.keys()):
             if growthDays >= growthDaysToAverage:
                 countyGrowth[day][state][county] = averageGrowth
                 try:
+                    lastGrowthDelta = growthDelta
                     growthDelta = (averageGrowth /
                             countyGrowth[yesterday][state][county] )
+                    growthDelta = (growthDelta * 3 + lastGrowthDelta * 1) / 4
                 except:
                     growthDelta = 1
                 casesByDate[day][state][county] = cases
@@ -106,7 +108,7 @@ for state in sorted(j.keys()):
 
 output = {}
 lookAt = []
-for a in range(7):
+for a in range(14):
     lookAt.append(moveIsoDate(mostRecent, -a))
 
 for lookDay in lookAt:
@@ -123,7 +125,11 @@ for lookDay in lookAt:
                     doublingDays = log(2)/log(thisGrowth)
                 else:
                     doublingDays = 0 
-                thisMagicNumber = thisCases * (thisGrowth ** 7)
+                try:
+                    thisMagicNumber = (prediction[moveIsoDate(lookDay,7
+                        )][state][county])
+                except:
+                    thisMagicNumber = thisCases * (thisGrowth ** 7)
                 line = (lookDay + "," + str(predicted) + "," +
                     str(doublingDays) + "," + str(thisCases) +
                     "," + str(thisMagicNumber) + "," + county + "," + 
