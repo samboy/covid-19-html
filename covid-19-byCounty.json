@@ -994,7 +994,7 @@
 				"cases": 1209, "deaths": 18
 			},
 			"2020-04-05" : {
-				"cases": 1209, "deaths": 19
+				"cases": 1326, "deaths": 19
 			}
 		},
 		"Humboldt" : {
@@ -2742,7 +2742,7 @@
 				"cases": 17, "deaths": 2
 			},
 			"2020-04-05" : {
-				"cases": 17, "deaths": 2
+				"cases": 20, "deaths": 3
 			}
 		},
 		"San Joaquin" : {
@@ -3346,7 +3346,7 @@
 				"cases": 168, "deaths": 1
 			},
 			"2020-04-05" : {
-				"cases": 168, "deaths": 1
+				"cases": 174, "deaths": 2
 			}
 		},
 		"Nevada" : {
