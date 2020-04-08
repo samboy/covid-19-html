@@ -1009,7 +1009,7 @@
 				"cases": 1326, "deaths": 19
 			},
 			"2020-04-06" : {
-				"cases": 1326, "deaths": 19
+				"cases": 1404, "deaths": 19
 			}
 		},
 		"Humboldt" : {
@@ -55830,22 +55830,22 @@
 				"cases": 207, "deaths": 9
 			},
 			"2020-04-01" : {
-				"cases": 207, "deaths": 9
-			},
-			"2020-04-02" : {
 				"cases": 229, "deaths": 9
 			},
+			"2020-04-02" : {
+				"cases": 254, "deaths": 9
+			},
 			"2020-04-03" : {
-				"cases": 328, "deaths": 10
+				"cases": 342, "deaths": 10
 			},
 			"2020-04-04" : {
 				"cases": 395, "deaths": 11
 			},
 			"2020-04-05" : {
-				"cases": 395, "deaths": 11
+				"cases": 421, "deaths": 11
 			},
 			"2020-04-06" : {
-				"cases": 421, "deaths": 12
+				"cases": 467, "deaths": 12
 			}
 		},
 		"Fort Bend" : {
@@ -56088,7 +56088,7 @@
 				"cases": 18, "deaths": 1
 			},
 			"2020-03-20" : {
-				"cases": 18, "deaths": 1
+				"cases": 27, "deaths": 1
 			},
 			"2020-03-21" : {
 				"cases": 31, "deaths": 1
@@ -56103,22 +56103,22 @@
 				"cases": 53, "deaths": 1
 			},
 			"2020-03-25" : {
-				"cases": 53, "deaths": 1
+				"cases": 66, "deaths": 1
 			},
 			"2020-03-26" : {
 				"cases": 88, "deaths": 1
 			},
 			"2020-03-27" : {
-				"cases": 88, "deaths": 1
-			},
-			"2020-03-28" : {
 				"cases": 118, "deaths": 1
 			},
-			"2020-03-29" : {
+			"2020-03-28" : {
 				"cases": 128, "deaths": 1
 			},
-			"2020-03-30" : {
+			"2020-03-29" : {
 				"cases": 134, "deaths": 1
+			},
+			"2020-03-30" : {
+				"cases": 160, "deaths": 1
 			},
 			"2020-03-31" : {
 				"cases": 160, "deaths": 1
@@ -56127,10 +56127,10 @@
 				"cases": 184, "deaths": 1
 			},
 			"2020-04-02" : {
-				"cases": 184, "deaths": 1
+				"cases": 207, "deaths": 1
 			},
 			"2020-04-03" : {
-				"cases": 227, "deaths": 1
+				"cases": 227, "deaths": 2
 			},
 			"2020-04-04" : {
 				"cases": 268, "deaths": 3
@@ -56210,13 +56210,13 @@
 				"cases": 631, "deaths": 13
 			},
 			"2020-04-01" : {
-				"cases": 631, "deaths": 13
+				"cases": 731, "deaths": 15
 			},
 			"2020-04-02" : {
 				"cases": 831, "deaths": 17
 			},
 			"2020-04-03" : {
-				"cases": 831, "deaths": 17
+				"cases": 921, "deaths": 17
 			},
 			"2020-04-04" : {
 				"cases": 1015, "deaths": 18
@@ -57069,10 +57069,10 @@
 				"cases": 206, "deaths": 4
 			},
 			"2020-04-01" : {
-				"cases": 206, "deaths": 4
+				"cases": 231, "deaths": 4
 			},
 			"2020-04-02" : {
-				"cases": 231, "deaths": 4
+				"cases": 254, "deaths": 5
 			},
 			"2020-04-03" : {
 				"cases": 273, "deaths": 6
