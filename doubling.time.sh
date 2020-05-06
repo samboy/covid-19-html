@@ -20,6 +20,9 @@ grep "$PATTERN" data.csv | awk -F, '
         v = '$DAYRANGE'; # Get the average growth for the last DAYRANGE days
         n = n + 1
         cases = $5
+        deaths = $6
+        # Uncomment ithe next line to track deaths
+        #cases = deaths
 
         # Calculate the actual doubling time, i.e. the last day we had
         # fewer than half the cases
