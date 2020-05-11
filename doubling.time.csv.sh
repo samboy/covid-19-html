@@ -14,7 +14,7 @@ fi
 
 # Calculate the doubling time for San Diego county
 
-echo 'Date,Cases,Doubling time (calculated days),Doubling time (actual days)'
+echo 'Date,Doubling time (calculated days),Doubling time (actual days),Cases'
 grep "$PATTERN" data.csv | awk -F, '
 {
         v = '$DAYRANGE'; # Get the average growth for the last DAYRANGE days
@@ -53,8 +53,8 @@ grep "$PATTERN" data.csv | awk -F, '
                 sum += list[a]
         }
         if(v > 0 && log(sum/v) > 0 && cases > 10) {
-                printf("%s,%d,%f,%d\n",$1,cases,log(2)/log(sum/v),
-                                actualDoublingDays)
+                printf("%s,%f,%d,%d\n",$1,cases,log(2)/log(sum/v),
+                                actualDoublingDays,cases)
         }
         last = cases
 }'
