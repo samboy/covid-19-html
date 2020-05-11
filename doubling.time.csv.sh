@@ -53,7 +53,7 @@ grep "$PATTERN" data.csv | awk -F, '
                 sum += list[a]
         }
         if(v > 0 && log(sum/v) > 0 && cases > 10) {
-                printf("%s,%f,%d,%d\n",$1,cases,log(2)/log(sum/v),
+                printf("%s,%f,%d,%d\n",$1,log(2)/log(sum/v),
                                 actualDoublingDays,cases)
         }
         last = cases
