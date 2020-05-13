@@ -69,7 +69,7 @@ grep "$PATTERN" data.csv | awk -F, '
 END {
         for(row=22;row>0;row--) {
                 printf("| ")
-                for(n=minGraph;n<60+minGraph;n++) {
+                for(n=minGraph;n<70+minGraph;n++) {
                         if(actualHistory[n] == row) {
                                 if(row == 22) {
                                         printf("+")
@@ -83,7 +83,7 @@ END {
                 print ""
         }
         printf("+-")
-        for(n=minGraph;n<60+minGraph;n++) {
+        for(n=minGraph;n<70+minGraph;n++) {
                 printf("-")
         }
         print ""
