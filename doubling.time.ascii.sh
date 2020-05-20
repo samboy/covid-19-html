@@ -22,6 +22,7 @@ grep "$PATTERN" data.csv | awk -F, '
         n = n + 1
         cases = $5
         deaths = $6
+	offset = 5 # How far to move down graph
         # Uncomment ithe next line to track deaths
         #cases = deaths
 
@@ -59,10 +60,10 @@ grep "$PATTERN" data.csv | awk -F, '
         } else {
                 calculatedDoublingDays = 0
         }
-        if(actualDoublingDays<22) {
+        if(actualDoublingDays<22 + offset) {
                 actualHistory[n] = actualDoublingDays
         } else {
-                actualHistory[n] = 22
+                actualHistory[n] = 22 + offset
         }
         last = cases
 }
@@ -70,8 +71,8 @@ END {
         for(row=22;row>0;row--) {
                 printf("| ")
                 for(n=minGraph;n<70+minGraph;n++) {
-                        if(actualHistory[n] == row) {
-                                if(row == 22) {
+                        if(actualHistory[n] == row + offset) {
+                                if(row == 22 + offset) {
                                         printf("+")
                                 } else {
                                         printf("O")
