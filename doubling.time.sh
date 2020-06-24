@@ -12,6 +12,12 @@ if [ -z "$DAYRANGE" ] ; then
         DAYRANGE=7
 fi
 
+# Do deaths: 0 is "no", 1 "yes"
+DODEATHS="$3"
+if [ -z "$DODEATHS" ] ; then
+	DODEATHS=0
+fi
+
 # Calculate the doubling time for San Diego county
 
 echo 'Colulmns are (left to right):'
@@ -29,8 +35,10 @@ grep "$PATTERN" data.csv | awk -F, '
         n = n + 1
         cases = $5
         deaths = $6
-        # Uncomment ithe next line to track deaths
-        #cases = deaths
+        # Uncomment the next line to track deaths
+	if('$DODEATHS') {
+        	cases = deaths
+	}
 
         # Calculate the actual doubling time, i.e. the last day we had
         # fewer than half the cases
