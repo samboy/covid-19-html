@@ -21,9 +21,13 @@ end
 g_search = arg[1]
 g_dayrange = tonumber(arg[2]) or nil
 g_doDeaths = arg[3]
+g_outputFormat = "space"
+if(string.find(arg[0],"csv")) then
+  g_outputFormat = "csv"
+end
+-- Default values
 if not g_search then g_search = "San Diego" end
 if not g_dayrange then g_dayrange = 7 end
-
 if not g_doDeaths or tonumber(g_doDeaths) == 0 then 
   g_doDeaths = false 
 else 
@@ -33,9 +37,14 @@ end
 -- Make Output string once we have the data to output
 function makeString(date, cases,calculatedDoublingTime,actualDoublingDays,
         delta, deltaAverage)
+  if g_outputFormat == "csv" then
+    return string.format("%s,%f,%d,%d",date, calculatedDoublingTime, 
+      actualDoublingDays, cases)
+  else
     return string.format("%s %8d %8.2f %8d %8d %8.2f",date, cases,
       calculatedDoublingTime, actualDoublingDays,
       delta, deltaAverage)
+  end
 end
 
 io.input("data.csv")
@@ -46,6 +55,15 @@ deltaList = {}
 n = 0
 hadHalf = 1
 last = 0
+
+-- Header describing fields
+if g_outputFormat == "csv" then
+  print(
+      'Date,Doubling time (calculated days),Doubling time (actual days),Cases')
+else 
+  print('Date          Cases   Doubling time        New daily cases')
+end
+
 while line do
   line = io.read()
   if not line then break end
