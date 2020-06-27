@@ -30,9 +30,19 @@ else
   g_doDeaths = true 
 end
 
+-- Make Output string once we have the data to output
+function makeString(date, cases,calculatedDoublingTime,actualDoublingDays,
+        delta, deltaAverage)
+    return string.format("%s %8d %8.2f %8d %8d %8.2f",date, cases,
+      calculatedDoublingTime, actualDoublingDays,
+      delta, deltaAverage)
+end
+
 io.input("data.csv")
 line = ""
 casesHistory = {}
+rollingAverage = {}
+deltaList = {}
 n = 0
 hadHalf = 1
 last = 0
@@ -42,6 +52,7 @@ while line do
   if string.find(line,g_search) then
 
     n = n + 1
+
     -- Get information from the comma separated line
     fields = rCharSplit(line,",")
     date = fields[1]
@@ -63,11 +74,50 @@ while line do
     if hadHalf > 1 and noHalf == 0 then
       actualDoublingDays = 1 + n - hadHalf
     else
-      actualDoublingDays = -1
+      actualDoublingDays = 0
     end
 
-    print(date,actualDoublingDays) -- DEBUG
+    -- Calculate an average growth over a range of days
+    local growth = 0
+    if last > 0 then
+      growth = cases / last
+    else
+      growth = 0
+    end
+    rollingAverage[n % g_dayrange] = growth
+    local sum = 0
+    for a = 0, g_dayrange do
+      if rollingAverage[a] then
+        sum = sum + rollingAverage[a]
+      end
+    end
 
+    -- Calculate the yesterday and average daily increase in cases
+    local delta = cases - last
+    deltaList[n % g_dayrange] = delta
+    local deltaSum = 0
+    for a = 0, g_dayrange do
+      if deltaList[a] then
+        deltaSum = deltaSum + deltaList[a]
+      end 
+    end
+    if g_dayrange > 0 then
+      deltaAverage = deltaSum / g_dayrange
+    end
+
+    -- Last is yesterday's case count
+    last = cases
+
+    -- Calculate the projected doubling time
+    local calculatedDoublingTime = 0
+    if g_dayrange > 0 and math.log(sum / g_dayrange) > 0 then
+      calculatedDoublingTime = math.log(2) / math.log(sum / g_dayrange)
+    end
+
+    -- Make output format string
+    outstring = makeString(date, cases, calculatedDoublingTime,
+        actualDoublingDays, delta, deltaAverage)
+    print(outstring)
   end
 end
 
