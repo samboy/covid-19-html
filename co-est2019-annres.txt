@@ -1,2 +1,6 @@
-Annual Estimates of the Resident Population for Counties in the United States: April 1, 2010 to July 1, 2019 (CO-EST2019-ANNRES)												
-Source: U.S. Census Bureau, Population Division												
+Annual Estimates of the Resident Population for Counties in the 
+United States: April 1, 2010 to July 1, 2019 (CO-EST2019-ANNRES)
+
+Source: U.S. Census Bureau, Population Division
+
+Format: County,State,Population (2019)
