@@ -124,6 +124,7 @@ function initPlaceData()
   return out;
 end
 
+-- Read the CSV file and get basic cases and growth from it
 line = io.read() -- Discard first line (fields)
 while line do
   line = io.read()
@@ -137,7 +138,6 @@ while line do
   here.state = fields[3]
   here.date[date] = {}
   today = here.date[date]
-  here.mostRecent = today -- We assume input is date-sorted
   
   -- Get information from the comma separated line
   today.cases = tonumber(fields[5]) or 0
@@ -171,6 +171,7 @@ end
 -- Process the totals we have to get growth rates and other calculated data 
 for place, here in sPairs(all) do
   for date, today in sPairs(here.date) do
+    here.mostRecent = today 
     here.n = here.n + 1
 
     -- Calculate actual doubling time (when we had half the cases compared
@@ -232,4 +233,18 @@ for place, here in sPairs(all) do
   end
 end
 
-tablePrint(all)
+-- Where are the hot spots
+heat = {}
+byHeat = {}
+n = 1
+for place, here in pairs(all) do
+  heat[place] = here.mostRecent.growth * 
+	(math.log(here.mostRecent.cases)/math.log(2))
+  byHeat[n] = place
+  n = n + 1
+end
+table.sort(byHeat, function(y,z) 
+	return heat[y] < heat[z] end)
+for a = 1, #byHeat do
+  print(byHeat[a],heat[byHeat[a]])
+end
