@@ -133,8 +133,8 @@ while line do
   place = fields[2] .. "," .. fields[3]
   if not all[place] then all[place] = initPlaceData() end
   here = all[place]
-  here.state = fields[2]
-  here.county = fields[3]
+  here.county = fields[2]
+  here.state = fields[3]
   here.date[date] = {}
   today = here.date[date]
   here.mostRecent = today -- We assume input is date-sorted
@@ -167,7 +167,8 @@ end
 for state, here in sPairs(state) do
    all[state] = here
 end
-    
+   
+-- Process the totals we have to get growth rates and other calculated data 
 for place, here in sPairs(all) do
   for date, today in sPairs(here.date) do
     here.n = here.n + 1
