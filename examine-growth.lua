@@ -207,6 +207,7 @@ for place, here in sPairs(all) do
         today.sum = today.sum + here.rollingAverage[a]
       end
     end
+    today.averageGrowth = today.sum / g_dayrange
 
     -- Calculate the yesterday and average daily increase in cases
     today.delta = today.cases - here.last
@@ -238,8 +239,13 @@ heat = {}
 byHeat = {}
 n = 1
 for place, here in pairs(all) do
-  heat[place] = here.mostRecent.growth * 
-	(math.log(here.mostRecent.cases)/math.log(2))
+
+  -- Fuzzy heuristic: 7-day average growth, reduce for small populations
+  heat[place] = here.mostRecent.averageGrowth;
+  if here.mostRecent.cases < 1000 then
+    heat[place] = heat[place] * (here.mostRecent.cases / 1000)
+  end
+
   byHeat[n] = place
   n = n + 1
 end
