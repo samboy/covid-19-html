@@ -105,6 +105,7 @@ function sPairs(t)
   return _tableIter, tt, nil
 end
 
+-------------------------------------------------------------------------
 io.input("data.csv")
 all = {}
 g_dayrange = 7
@@ -129,67 +130,71 @@ while line do
   today = here.date[date]
   here.mostRecent = today -- We assume input is date-sorted
   
-  here.n = here.n + 1
-
   -- Get information from the comma separated line
   today.cases = tonumber(fields[5])
   today.deaths = tonumber(fields[6])
+end
 
-  -- Calculate actual doubling time (when we had half the cases compared
-  -- to a given day)
-  here.casesHistory[here.n] = cases
-  here.noHalf = 0
-  while here.casesHistory[here.hadHalf] and 
-        here.casesHistory[here.hadHalf] < (here.cases / 2) do
-    here.hadHalf = here.hadHalf + 1
-    if here.hadHalf > here.n then
-      here.noHalf = 1
-      here.hadHalf = 1
-      break
+for place, here in sPairs(all) do
+  for date, today in sPairs(here.date) do
+    here.n = here.n + 1
+
+    -- Calculate actual doubling time (when we had half the cases compared
+    -- to a given day)
+    here.casesHistory[here.n] = today.cases
+    here.noHalf = 0
+    while here.casesHistory[here.hadHalf] and 
+        here.casesHistory[here.hadHalf] < (today.cases / 2) do
+      here.hadHalf = here.hadHalf + 1
+      if here.hadHalf > here.n then
+        here.noHalf = 1
+        here.hadHalf = 1
+        break
+      end
     end
-  end
-  if here.hadHalf > 1 and here.noHalf == 0 then
-    today.actualDoublingDays = 1 + here.n - here.hadHalf
-  else
-    today.actualDoublingDays = 0
-  end
+    if here.hadHalf > 1 and here.noHalf == 0 then
+      today.actualDoublingDays = 1 + here.n - here.hadHalf
+    else
+      today.actualDoublingDays = 0
+    end
 
-  -- Calculate an average growth over a range of days
-  today.growth = 0
-  if here.last > 0 then
-    today.growth = today.cases / here.last
-  else
+    -- Calculate an average growth over a range of days
     today.growth = 0
-  end
-  here.rollingAverage[here.n % g_dayrange] = today.growth
-  today.sum = 0
-  for a = 0, g_dayrange do
-    if here.rollingAverage[a] then
-      today.sum = today.sum + here.rollingAverage[a]
+    if here.last > 0 then
+      today.growth = today.cases / here.last
+    else
+      today.growth = 0
     end
-  end
+    here.rollingAverage[here.n % g_dayrange] = today.growth
+    today.sum = 0
+    for a = 0, g_dayrange do
+      if here.rollingAverage[a] then
+        today.sum = today.sum + here.rollingAverage[a]
+      end
+    end
 
-  -- Calculate the yesterday and average daily increase in cases
-  today.delta = today.cases - here.last
-  here.deltaList[here.n % g_dayrange] = today.delta
-  today.deltaSum = 0
-  for a = 0, g_dayrange do
-    if here.deltaList[a] then
-      today.deltaSum = today.deltaSum + here.deltaList[a]
-    end 
-  end
-  if g_dayrange > 0 then
-    today.deltaAverage = today.deltaSum / g_dayrange
-  end
+    -- Calculate the yesterday and average daily increase in cases
+    today.delta = today.cases - here.last
+    here.deltaList[here.n % g_dayrange] = today.delta
+    today.deltaSum = 0
+    for a = 0, g_dayrange do
+      if here.deltaList[a] then
+        today.deltaSum = today.deltaSum + here.deltaList[a]
+      end 
+    end
+    if g_dayrange > 0 then
+      today.deltaAverage = today.deltaSum / g_dayrange
+    end
 
-  -- Last is yesterday's case count
-  here.last = today.cases
+    -- Last is yesterday's case count
+    here.last = today.cases
 
-  -- Calculate the projected doubling time
-  today.calculatedDoublingTime = 0
-  if g_dayrange > 0 and math.log(today.sum / g_dayrange) > 0 then
-    today.calculatedDoublingTime = 
-        math.log(2) / math.log(today.sum / g_dayrange)
+    -- Calculate the projected doubling time
+    today.calculatedDoublingTime = 0
+    if g_dayrange > 0 and math.log(today.sum / g_dayrange) > 0 then
+      today.calculatedDoublingTime = 
+          math.log(2) / math.log(today.sum / g_dayrange)
+    end
   end
 end
 
