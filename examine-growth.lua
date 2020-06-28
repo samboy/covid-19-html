@@ -10,6 +10,13 @@ function rCharSplit(i, c)
   local out = {}
   local n = 1
   local q
+
+  -- For one-character separators, like ",", we allow empty fields
+  if string.len(tostring(c)) == 1 then
+    i = string.gsub(i, tostring(c) .. tostring(c),
+                    tostring(c) .. " " .. tostring(c))
+  end
+
   for q in string.gmatch(i, "[^" .. tostring(c) .. "]+") do
     out[n] = q
     n = n + 1
@@ -126,15 +133,41 @@ while line do
   place = fields[2] .. "," .. fields[3]
   if not all[place] then all[place] = initPlaceData() end
   here = all[place]
+  here.state = fields[2]
+  here.county = fields[3]
   here.date[date] = {}
   today = here.date[date]
   here.mostRecent = today -- We assume input is date-sorted
   
   -- Get information from the comma separated line
-  today.cases = tonumber(fields[5])
-  today.deaths = tonumber(fields[6])
+  today.cases = tonumber(fields[5]) or 0
+  today.deaths = tonumber(fields[6]) or 0
 end
 
+-- Add up numbers in a state to get a by-state total
+state = {}
+for place, here in sPairs(all) do
+  if not state[here.state] then state[here.state] = initPlaceData() end
+  for date, today in sPairs(here.date) do
+    if not state[here.state].date[date] then 
+      state[here.state].date[date] = {} 
+    end
+    if not state[here.state].date[date].cases then
+      state[here.state].date[date].cases = 0
+    end
+    if not state[here.state].date[date].deaths then
+      state[here.state].date[date].deaths = 0
+    end
+    state[here.state].date[date].cases = state[here.state].date[date].cases +
+        today.cases
+    state[here.state].date[date].deaths = state[here.state].date[date].deaths +
+        today.deaths
+  end
+end
+for state, here in sPairs(state) do
+   all[state] = here
+end
+    
 for place, here in sPairs(all) do
   for date, today in sPairs(here.date) do
     here.n = here.n + 1

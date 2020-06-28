@@ -10,6 +10,13 @@ function rCharSplit(i, c)
   local out = {}
   local n = 1
   local q
+
+  -- For one-character separators, like ",", we allow empty fields
+  if string.len(tostring(c)) == 1 then
+    i = string.gsub(i, tostring(c) .. tostring(c),
+                    tostring(c) .. " " .. tostring(c))
+  end
+
   for q in string.gmatch(i, "[^" .. tostring(c) .. "]+") do
     out[n] = q
     n = n + 1
