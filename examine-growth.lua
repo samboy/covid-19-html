@@ -113,6 +113,24 @@ function sPairs(t)
 end
 
 -------------------------------------------------------------------------
+-- Read by-county population data
+io.input("co-est2019-annres.csv")
+line = ""
+pop = {}
+while line do
+  line = io.read()
+  if not line then break end
+  fields = rCharSplit(line,",")
+  county = fields[1]
+  state = fields[2]  
+  place = fields[1] .. "," .. fields[2]
+  population = tonumber(fields[3])
+  pop[place] = population
+  if not pop[state] then pop[state] = 0 end
+  pop[state] = pop[state] + population
+end
+io.close()
+  
 io.input("data.csv")
 all = {}
 g_dayrange = 7
@@ -136,6 +154,7 @@ while line do
   here = all[place]
   here.county = fields[2]
   here.state = fields[3]
+  here.pop = pop[place]
   here.date[date] = {}
   today = here.date[date]
   
@@ -166,6 +185,7 @@ for place, here in sPairs(all) do
 end
 for state, here in sPairs(state) do
    all[state] = here
+   all[state].pop = pop[state]
 end
    
 -- Process the totals we have to get growth rates and other calculated data 
@@ -227,10 +247,25 @@ for place, here in sPairs(all) do
 
     -- Calculate the projected doubling time
     today.calculatedDoublingTime = 0
-    if g_dayrange > 0 and math.log(today.sum / g_dayrange) > 0 then
+    if g_dayrange > 0 and math.log(today.averageGrowth) > 0 then
       today.calculatedDoublingTime = 
-          math.log(2) / math.log(today.sum / g_dayrange)
+          math.log(2) / math.log(today.averageGrowth)
     end
+
+    -- Cases per 100,000 people
+    if here.pop and here.pop > 0 then
+      today.casesPer100k = (today.cases / here.pop) * 100000
+    end
+
+    -- Estimate when we will have "Herd immunity".  Here, "Herd immunity"
+    -- is how long, based on estimated doubling time, it would take
+    -- for 10% of the population to have a COVID-19 case (we presume the
+    -- other 90% are asymptomatic) 
+    if here.pop and math.log(today.averageGrowth) > 0 and today.cases > 0 then
+      today.herdImmunityCalc = math.log((here.pop / 10) / today.cases) /
+          math.log(today.averageGrowth)
+    end
+
   end
 end
 
@@ -239,18 +274,23 @@ heat = {}
 byHeat = {}
 n = 1
 for place, here in pairs(all) do
+  if(here.pop) then
+    -- Fuzzy heuristic: 7-day average growth, reduce for small populations
+    heat[place] = here.mostRecent.averageGrowth;
+    if here.mostRecent.cases < 1000 then
+      heat[place] = heat[place] * (here.mostRecent.cases / 1000)
+    end
 
-  -- Fuzzy heuristic: 7-day average growth, reduce for small populations
-  heat[place] = here.mostRecent.averageGrowth;
-  if here.mostRecent.cases < 1000 then
-    heat[place] = heat[place] * (here.mostRecent.cases / 1000)
+    byHeat[n] = place
+    n = n + 1
   end
-
-  byHeat[n] = place
-  n = n + 1
 end
 table.sort(byHeat, function(y,z) 
 	return heat[y] < heat[z] end)
 for a = 1, #byHeat do
-  print(byHeat[a],heat[byHeat[a]])
+  if #byHeat - a < 20 then
+    print(byHeat[a],heat[byHeat[a]])
+  end
 end
+
+-- CSV data for a given location
