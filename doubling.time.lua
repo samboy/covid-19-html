@@ -24,6 +24,24 @@ function rCharSplit(i, c)
   return out
 end
 
+----------------------- Read by-county population data -----------------------
+io.input("co-est2019-annres.csv")
+line = ""
+pop = {}
+while line do
+  line = io.read()
+  if not line then break end
+  fields = rCharSplit(line,",")
+  county = fields[1]
+  state = fields[2]
+  place = fields[1] .. "," .. fields[2]
+  population = tonumber(fields[3])
+  pop[place] = population
+  if not pop[state] then pop[state] = 0 end
+  pop[state] = pop[state] + population
+end
+io.close()
+
 ----------------------- Process command line arguments -----------------------
 g_search = arg[1]
 g_dayrange = tonumber(arg[2]) or nil
@@ -43,10 +61,10 @@ end
 
 -- Make Output string once we have the data to output
 function makeString(date, cases,calculatedDoublingTime,actualDoublingDays,
-        delta, deltaAverage)
+        delta, deltaAverage, casesPer100k, herdImmunityCalc)
   if g_outputFormat == "csv" then
-    return string.format("%s,%f,%d,%d",date, calculatedDoublingTime, 
-      actualDoublingDays, cases)
+    return string.format("%s,%f,%d,%d,%.2f,%.2f",date, calculatedDoublingTime, 
+      actualDoublingDays, cases, casesPer100k, herdImmunityCalc)
   else
     return string.format("%s %8d %8.2f %8d %8d %8.2f",date, cases,
       calculatedDoublingTime, actualDoublingDays,
@@ -83,6 +101,7 @@ while line do
     date = fields[1]
     cases = tonumber(fields[5])
     deaths = tonumber(fields[6])
+    place = fields[2] .. "," .. fields[3]
 
     -- Calculate actual doubling time (when we had half the cases compared
     -- to a given day)
@@ -116,6 +135,7 @@ while line do
         sum = sum + rollingAverage[a]
       end
     end
+    averageGrowth = sum / g_dayrange
 
     -- Calculate the yesterday and average daily increase in cases
     local delta = cases - last
@@ -135,13 +155,31 @@ while line do
 
     -- Calculate the projected doubling time
     local calculatedDoublingTime = 0
-    if g_dayrange > 0 and math.log(sum / g_dayrange) > 0 then
-      calculatedDoublingTime = math.log(2) / math.log(sum / g_dayrange)
+    if g_dayrange > 0 and math.log(averageGrowth) > 0 then
+      calculatedDoublingTime = math.log(2) / math.log(averageGrowth)
     end
 
+    casesPer100k = -1
+    herdImmunityCalc = -1
+
+    -- Cases per 100,000 people
+    if pop[place] and pop[place] > 0 then
+      casesPer100k = (cases / pop[place]) * 100000
+    end
+   
+    -- Estimate when we will have "Herd immunity".  Here, "Herd immunity"
+    -- is how long, based on estimated doubling time, it would take
+    -- for 10% of the population to have a COVID-19 case (we presume the
+    -- other 90% are asymptomatic)
+    if pop[place] and math.log(averageGrowth) > 0 and cases > 0 then
+      herdImmunityCalc = math.log((pop[place] / 10) / cases) /
+          math.log(averageGrowth)
+    end
+    
     -- Make output format string
     outstring = makeString(date, cases, calculatedDoublingTime,
-        actualDoublingDays, delta, deltaAverage)
+        actualDoublingDays, delta, deltaAverage, casesPer100k, 
+        herdImmunityCalc)
     print(outstring)
   end
 end
