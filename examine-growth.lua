@@ -112,6 +112,38 @@ function sPairs(t)
   return _tableIter, tt, nil
 end
 
+-------------------------------- process args --------------------------------
+if #arg == 0 or arg[1] == '--help' then
+  print [=[Usage:
+
+	examine-growth [action] [args]
+
+Action can be either "--help" to show this message, or "cases" to show
+the cases for a given location by day, or "csv" to show the cases in
+CSV format suitable for importing in to a spreadsheet to make a chart.
+
+If "action" is "cases" or "csv", the following args are (in order)
+
+* County or State name we print data for.  Use County,State to specify
+  a given county in a given state.  Should we have both a state and county
+  with a name, we use the state name.  Should we have a county which is
+  in multiple states, one will be chosen pseudo-randomly.
+* Day range: How many days do we average some numbers over
+* Do deaths: If this is "1", process deaths, not cases
+
+If action is "hotSpots", list locations with what appears to be
+dangerous COVID-19 growth, based on fuzzy heuristic
+
+  ]=]
+  os.exit(0)
+end
+if arg[1] == "cases" or arg[1] == "csv" then
+  g_outputFormat = arg[1]
+  g_search = arg[2] or "San Diego"
+  g_dayrange = tonumber(arg[3]) or 7
+  g_doDeaths = arg[4] or false
+end
+
 -------------------------------------------------------------------------
 -- Read by-county population data
 io.input("co-est2019-annres.csv")
@@ -196,8 +228,11 @@ for place, here in sPairs(all) do
 
     -- Calculate actual doubling time (when we had half the cases compared
     -- to a given day)
-    here.casesHistory[here.n] = today.cases
+    if g_doDeaths then
+      today.cases = today.deaths
+    end
     here.noHalf = 0
+    here.casesHistory[here.n] = today.cases
     while here.casesHistory[here.hadHalf] and 
         here.casesHistory[here.hadHalf] < (today.cases / 2) do
       here.hadHalf = here.hadHalf + 1
@@ -287,10 +322,66 @@ for place, here in pairs(all) do
 end
 table.sort(byHeat, function(y,z) 
 	return heat[y] < heat[z] end)
-for a = 1, #byHeat do
-  if #byHeat - a < 20 then
-    print(byHeat[a],heat[byHeat[a]])
+
+function showHotSpots(heat, byHeat) 
+  for a = 1, #byHeat do
+    if #byHeat - a < 20 then
+      print(byHeat[a],heat[byHeat[a]])
+    end
   end
 end
 
--- CSV data for a given location
+if arg[1] == 'hotSpots' then
+  showHotSpots(heat, byHeat)
+  os.exit(0)
+end
+
+-- Make Output string once we have the data to output
+function makeString(date, cases,calculatedDoublingTime,actualDoublingDays,
+        delta, deltaAverage, casesPer100k, herdImmunityCalc)
+  if g_outputFormat == "csv" then
+    return string.format("%s,%f,%d,%d,%.2f,%.2f",date, calculatedDoublingTime,
+      actualDoublingDays, cases, casesPer100k, herdImmunityCalc)
+  else
+    return string.format("%s %8d %8.2f %8d %8d %8.2f",date, cases,
+      calculatedDoublingTime, actualDoublingDays,
+      delta, deltaAverage)
+  end
+end
+
+-------------------- cases/csv (by County tabulation) --------------------
+if arg[1] == 'cases' or arg[1] == 'csv' then
+  local here = nil
+
+  -- Look for state with search name
+  for place, _ in sPairs(state) do
+    if string.match(place, g_search) then
+      here = all[place]
+      break
+    end
+  end
+
+  -- Look for county or county,state with search name
+  if not here then
+    for place, details in sPairs(all) do
+      if string.match(place, g_search) then
+        here = details
+        break
+      end
+    end
+  end
+
+  if not here then
+    print("Could not find place " .. g_search)
+    os.exit(1)
+  end
+
+  for date, data in sPairs(here.date) do
+    line = makeString(date, data.cases, data.calculatedDoublingTime,
+                      data.actualDoublingDays, data.delta, 
+                      data.deltaAverage, data.casesPer100k, 
+                      data.herdImmunityCalc or -1)
+    print(line)
+  end
+  os.exit(0)
+end
