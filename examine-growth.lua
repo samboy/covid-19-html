@@ -127,9 +127,10 @@ If "action" is "cases" or "csv", the following args are (in order)
 * County or State name we print data for.  Use County,State to specify
   a given county in a given state.  Should we have both a state and county
   with a name, we use the state name.  Should we have a county which is
-  in multiple states, one will be chosen pseudo-randomly.
-* Day range: How many days do we average some numbers over
-* Do deaths: If this is "1", process deaths, not cases
+  in multiple states, one will be chosen pseudo-randomly, unless state
+  is also specified.  Use "USA" to look at overall national numbers.
+* Day range: How many days do we average some numbers over. Default: 7
+* Do deaths: If this is "1", process deaths, not cases. Default: 0
 
 If action is "hotSpots", list locations with what appears to be
 dangerous COVID-19 growth, based on fuzzy heuristic
@@ -142,6 +143,9 @@ if arg[1] == "cases" or arg[1] == "csv" then
   g_search = arg[2] or "San Diego"
   g_dayrange = tonumber(arg[3]) or 7
   g_doDeaths = arg[4] or false
+  -- Let's be compatible with the old AWK script; 0 being false is
+  -- the case in pretty much anything besides Lua
+  if arg[4] and tonumber(arg[4]) == 0 then g_doDeaths = false end
 end
 
 -------------------------------------------------------------------------
@@ -149,6 +153,7 @@ end
 io.input("co-est2019-annres.csv")
 line = ""
 pop = {}
+USpop = 0
 while line do
   line = io.read()
   if not line then break end
@@ -160,6 +165,7 @@ while line do
   pop[place] = population
   if not pop[state] then pop[state] = 0 end
   pop[state] = pop[state] + population
+  USpop = USpop + population
 end
 io.close()
   
@@ -197,28 +203,36 @@ end
 
 -- Add up numbers in a state to get a by-state total
 state = {}
+USA = initPlaceData()
 for place, here in sPairs(all) do
   if not state[here.state] then state[here.state] = initPlaceData() end
   for date, today in sPairs(here.date) do
     if not state[here.state].date[date] then 
       state[here.state].date[date] = {} 
     end
+    if not USA.date[date] then USA.date[date] = {} end
     if not state[here.state].date[date].cases then
       state[here.state].date[date].cases = 0
     end
+    if not USA.date[date].cases then USA.date[date].cases = 0 end
     if not state[here.state].date[date].deaths then
       state[here.state].date[date].deaths = 0
     end
+    if not USA.date[date].deaths then USA.date[date].deaths = 0 end
     state[here.state].date[date].cases = state[here.state].date[date].cases +
         today.cases
     state[here.state].date[date].deaths = state[here.state].date[date].deaths +
         today.deaths
+    USA.date[date].cases = USA.date[date].cases + today.cases
+    USA.date[date].deaths = USA.date[date].deaths + today.deaths
   end
 end
 for state, here in sPairs(state) do
    all[state] = here
    all[state].pop = pop[state]
 end
+all["USA"] = USA
+all["USA"].pop = USpop
    
 -- Process the totals we have to get growth rates and other calculated data 
 for place, here in sPairs(all) do
@@ -300,6 +314,8 @@ for place, here in sPairs(all) do
       today.herdImmunityCalc = math.log((here.pop / 10) / today.cases) /
           math.log(today.averageGrowth)
     end
+    -- When looking at deaths, "herd Immunity" is a meaningless number
+    if g_doDeaths then today.herdImmunityCalc = -1 end
 
   end
 end
@@ -336,6 +352,15 @@ if arg[1] == 'hotSpots' then
   os.exit(0)
 end
 
+-- Header string for tabulated output
+function makeHeaderString()
+  if g_outputFormat == "csv" then return
+    "Date,Doubling time (calculated days),Doubling time (actual days),Cases"
+  else return
+    "Date          Cases   Doubling time        New daily cases"
+  end
+end
+    
 -- Make Output string once we have the data to output
 function makeString(date, cases,calculatedDoublingTime,actualDoublingDays,
         delta, deltaAverage, casesPer100k, herdImmunityCalc)
