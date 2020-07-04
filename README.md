@@ -12,6 +12,7 @@ the following commands:
 
 ```sh
 git clone https://github.com/nytimes/covid-19-data/
+cp covid-19-data/us-counties.csv data.csv
 lua examine-growth.lua svg > map.svg
 ```
 
