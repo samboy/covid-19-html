@@ -4,44 +4,101 @@ require("LUAstuff")
 require("stateNameAbbr")
 require("USmap")
 -------------------------------- process args --------------------------------
-if #arg == 0 or arg[1] == '--help' then
-  print [=[Usage:
 
-	examine-growth [action] [args]
+if #arg == 0 then
+  print [=[Basic usage:
 
-Action can be either "--help" to show this message, or "cases" to show
-the cases for a given location by day, or "csv" to show the cases in
-CSV format suitable for importing in to a spreadsheet to make a chart.
+Step one is to grab the data from The New York Times:
 
-If "action" is "cases" or "csv", the following args are (in order)
+	git clone https://github.com/nytimes/covid-19-data/
+	cp covid-19-data/us-counties.csv data.csv
 
-* County or State name we print data for.  Use County,State to specify
-  a given county in a given state.  Should we have both a state and county
-  with a name, we use the state name.  Should we have a county which is
-  in multiple states, one will be chosen pseudo-randomly, unless state
-  is also specified.  Use "USA" to look at overall national numbers.
-* Day range: How many days do we average some numbers over. Default: 7
-* Do deaths: If this is "1", process deaths, not cases. Default: 0
+Then we can make a SVG map showing growth, where green is low growth
+and red is high growth:
 
-If action is "svg", we output, on standard output, a SVG map of the 
-United States for a given field.  Cyan means things look good, red means
-things look bad.  Arguments for "svg" are:
+	lua examine-growth.lua svg > map.svg
 
-* Field: What to visualize.  Can be one of "averageGrowth", (how
-  much growth have we seen over the last N days, where N is the
-  day range), "actualDoublingDays", "calculatedDoublingTime", 
-  "casesPer100k", or "herdImmunityCalc" (how long it would take 
-  for a large portion of the population to have COVID-19).
-  Default is "averageGrowth".
-* Day range: How many days do we average some numbers over. Default: 7
-* Do deaths: If this is "1", process deaths, not cases. Default: 0
+To see some more examples of usage:
 
-If action is "hotSpots", list locations with what appears to be
-dangerous COVID-19 growth, based on fuzzy heuristic
+	lua examine-growth.lua --examples
 
+To see a full reference manual:
+
+	lua examine-growth.lua --help
   ]=]
   os.exit(0)
 end
+
+if arg[1] == '--help' then
+  print [=[
+The file "data.csv" needs to be fetched from the NYT to run this program.
+
+Usage:
+
+	examine-growth [action] [args]
+
+Action can be either "--help" to show this message, "--examples" to
+show examples of this program being used, "cases" to show the cases
+for a given location by day, "csv" to show the cases in CSV format
+(for spreadsheets), or "svg" to output a SVG map image on standard output.
+
+If "action" is "cases" or "csv", the first optional argument is the
+county or state name we print data for.  Use County,State to specify
+a given county.  Should we have both a state and county with a name,
+we use the state name.  Avoid naming just a county without a state.
+Use "USA" to look at overall national numbers.  Default is "San Diego".
+
+If action is "svg", in the generated map green means things look good, red
+means things look bad.  The first optional argument is what to visualize.
+Can be one of "averageGrowth", (how much growth have we seen over the
+last "day range" days), "actualDoublingDays", "calculatedDoublingTime",
+"casesPer100k", or "herdImmunityCalc" (how long it would take for a large
+portion of the population to have COVID-19).  Default is "averageGrowth".
+
+For "cases", "csv", or "svg", subsequent arguments are: 
+
+2. Day range: How many days do we average some numbers over. Default: 7
+3. Do deaths: If this is "1", process deaths, not cases. Default: 0
+
+If action is "hotSpots", list locations with possible dangerous growth.
+  ]=]
+  os.exit(0)
+end
+if arg[1] == "--examples" then
+  print [=[Examples of usage:
+
+Step one is to grab the data from The New York Times:
+
+	git clone https://github.com/nytimes/covid-19-data/
+	cp covid-19-data/us-counties.csv data.csv
+
+Once we have the data.csv file, we can make a SVG map:
+
+	lua examine-growth.lua svg > map.svg
+
+We can also make a CSV file for, say Arizona, to import in to a spreadsheet:
+
+	lua examine-growth.lua csv Arizona > COVID-19.csv
+
+To look at growth in just Miami-Dade county in a CSV file:
+
+	lua examine-growth.lua csv Miami.Dade,Florida > COVID-19.CSV
+
+To see how much of a problem we have in Houston, Texas:
+
+	lua examine-growth.lua csv Harris,Texas > COVID-19.CSV
+
+(Houston is in Harris county)
+
+Make a SVG map of the number of cases per capita:
+
+	lua example-growth.lua svg casesPer100k > map.svg
+
+To see a reference manual, type in lua examine-growth.lua --help
+  ]=]
+  os.exit(0)
+end
+
 if arg[1] == "cases" or arg[1] == "csv" then
   g_outputFormat = arg[1]
   g_search = arg[2] or "San Diego"
