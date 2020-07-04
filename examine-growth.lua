@@ -359,9 +359,11 @@ if arg[1] == "svg" then
       if u >=0 then
         if g_field == "calculatedDoublingTime" 
             or g_field == "actualDoublingDays" then
-          color = calcColor(0xff, 0x00, 0x00, 0x00, 0xff, 0xff, u)
+          -- color = calcColor(0x80, 0x00, 0x00, 0x00, 0x80, 0x80, u)
+          color = calcColor(0xd2, 0x26, 0x32, 0x0b, 0xb2, 0xff, u)
         else
-          color = calcColor(0x00, 0xff, 0xff, 0xff, 0x00, 0x00, u)
+          -- color = calcColor(0x00, 0x80, 0x80, 0x80, 0x00, 0x00, u)
+          color = calcColor(0x0b, 0xff, 0x20, 0xd2, 0x26, 0x32, u)
         end
         repl = repl .. "#" .. sAbbr .. "{fill: #" .. color .. ";}" ..
                " <!-- " .. tostring(t) .. "-->\n"
