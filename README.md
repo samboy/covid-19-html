@@ -4,6 +4,11 @@ This takes the data from https://github.com/nytimes/covid-19-data/ for
 a single county and converts it.  We can make tabular data or a SVG map
 of the Unites States visualizing data.
 
+# Demo
+
+Go to https://samboy.github.io/covid-19-html/ to see what this
+program can do.
+
 # Making a SVG map
 
 To make a SVG map of the data, make sure one has Git and the 
@@ -24,32 +29,6 @@ There are other options to the `examine-growth.lua` script, such as:
 
 One can get full command line options with 
 `lua examine-growth.lua --help`
-
-# Trying to predict growth
-
-I am working on trying to make an accurate model for predicting COVID-19
-growth based on the per-county figures we have with COVID-19 (courtesy
-The New York Times).  To say the data is noisy would be an understatement.
-
-What I have found, so far, is that if we look at current daily growth
-(averaged over seven days) and use exponentiation to predict future
-growth based on the previous week’s figures, the numbers are too high
-(usually by a factor of two, but the error amount is all over the place).
-
-Point being, we’re seeing a more complicated growth model than simple
-exponential growth; the actual growth is lower.
-
-*This is a work in progress* and I’m nowhere near being able to make
-a simple easy to read graph showing a reasonable projection of COVID-19
-growth in the United States.
-
-# Output formats
-
-Possible output formats are:
-
-* An HTML table
-* A CSV file
-* A JSON file
 
 # Using the JSON file as an API
 
