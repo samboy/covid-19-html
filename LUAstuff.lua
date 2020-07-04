@@ -114,3 +114,19 @@ function sPairs(t)
   tt.i = 1
   return _tableIter, tt, nil
 end
+
+-- Given two RGB colors and a value from 0 to 1, find a color between
+-- those two colors.  Output the color as hex.  The colors will be 
+-- between 0 and 255
+function calcColor(r1, g1, b1, r2, g2, b2, value)
+  if value < 0 or value > 1 then return '00ffff' end -- Error
+  if r1 < 0 or r1 > 255 or g1 < 0 or g1 > 255 or b1 < 0 or b1 > 255 or
+     r2 < 0 or r2 > 255 or g2 < 0 or g2 > 255 or b2 < 0 or b2 > 255 then
+    return '00ffff' -- Error
+  end
+  r = (r1 * value + r2 * (1 - value)) / 2
+  g = (g1 * value + g2 * (1 - value)) / 2
+  b = (b1 * value + b2 * (1 - value)) / 2
+  return string.format("%02x%02x%02x",r,g,b)
+end
+

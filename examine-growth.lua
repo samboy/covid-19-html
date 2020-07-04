@@ -303,4 +303,30 @@ if arg[1] == 'cases' or arg[1] == 'csv' then
 end
 
 -------------------- make a map of a single datapoint --------------------
-
+if arg[1] == "svg" then
+  max = 0
+  g_field = "herdImmunityCalc" -- Data point to examine
+  -- Find "max" so we have 0 <-> 1 gradient
+  for state, sAbbr in sPairs(stateNameAbbr) do
+    if all and all[state] and all[state]["mostRecent"] and 
+       all[state]["mostRecent"][g_field] then
+      local t = all[state]["mostRecent"][g_field]
+      if t > max then max = t end
+    end
+  end
+  -- Make a string with a color for each state
+  repl = ""
+  for state, sAbbr in sPairs(stateNameAbbr) do
+    if all and all[state] and all[state]["mostRecent"] and
+       all[state]["mostRecent"][g_field] then
+      local t = all[state]["mostRecent"][g_field]
+      if t > 0 and t <= max then t = t / max else t = -1 end
+      if t >=0 then
+        color = calcColor(0x0b, 0xff, 0xb2, 0xd2, 0x26, 0x32, t)
+        repl = repl .. "#" .. sAbbr .. "{fill: #" .. color .. ";}\n"
+      end
+    end
+  end
+  out = string.gsub(USmapSVG,'<!..COLORS..>',repl)
+  print(out)
+end
