@@ -23,6 +23,19 @@ If "action" is "cases" or "csv", the following args are (in order)
 * Day range: How many days do we average some numbers over. Default: 7
 * Do deaths: If this is "1", process deaths, not cases. Default: 0
 
+If action is "svg", we output, on standard output, a SVG map of the 
+United States for a given field.  Cyan means things look good, red means
+things look bad.  Arguments for "svg" are:
+
+* Field: What to visualize.  Can be one of "averageGrowth", (how
+  much growth have we seen over the last N days, where N is the
+  day range), "actualDoublingDays", "calculatedDoublingTime", 
+  "casesPer100k", or "herdImmunityCalc" (how long it would take 
+  for a large portion of the population to have COVID-19).
+  Default is "averageGrowth".
+* Day range: How many days do we average some numbers over. Default: 7
+* Do deaths: If this is "1", process deaths, not cases. Default: 0
+
 If action is "hotSpots", list locations with what appears to be
 dangerous COVID-19 growth, based on fuzzy heuristic
 
@@ -38,6 +51,21 @@ if arg[1] == "cases" or arg[1] == "csv" then
   -- the case in pretty much anything besides Lua
   if arg[4] and tonumber(arg[4]) == 0 then g_doDeaths = false end
 end
+if arg[1] == "svg" then
+  g_field = arg[2] or "averageGrowth"
+  if g_field ~= "averageGrowth" and 
+     g_field ~= "actualDoublingDays" and
+     g_field ~= "calculatedDoublingTime" and
+     g_field ~= "casesPer100k" and
+     g_field ~= "herdImmunityCalc" then
+    print("Invalid field to view for SVG map")
+    os.exit(1)
+  end
+  g_dayrange = tonumber(arg[3]) or 7
+  g_doDeaths = arg[4] or false
+  if arg[4] and tonumber(arg[4]) == 0 then g_doDeaths = false end
+end
+
 
 -------------------------------------------------------------------------
 -- Read by-county population data
@@ -59,6 +87,10 @@ while line do
   USpop = USpop + population
 end
 io.close()
+-- NUmbers obtained from the Wikipedia 2020-07-03
+if not pop["Alaska"] then pop["Alaska"]=710249 end
+if not pop["District of Columbia"] then pop["District of Columbia"]=705749 end
+if not pop["Louisiana"] then pop["Louisiana"]=4648794 end
   
 io.input("data.csv")
 all = {}
@@ -305,13 +337,14 @@ end
 -------------------- make a map of a single datapoint --------------------
 if arg[1] == "svg" then
   max = 0
-  g_field = "herdImmunityCalc" -- Data point to examine
+  min = 100000
   -- Find "max" so we have 0 <-> 1 gradient
   for state, sAbbr in sPairs(stateNameAbbr) do
     if all and all[state] and all[state]["mostRecent"] and 
        all[state]["mostRecent"][g_field] then
       local t = all[state]["mostRecent"][g_field]
       if t > max then max = t end
+      if t < min then min = t end
     end
   end
   -- Make a string with a color for each state
@@ -320,10 +353,17 @@ if arg[1] == "svg" then
     if all and all[state] and all[state]["mostRecent"] and
        all[state]["mostRecent"][g_field] then
       local t = all[state]["mostRecent"][g_field]
-      if t > 0 and t <= max then t = t / max else t = -1 end
-      if t >=0 then
-        color = calcColor(0x0b, 0xff, 0xb2, 0xd2, 0x26, 0x32, t)
-        repl = repl .. "#" .. sAbbr .. "{fill: #" .. color .. ";}\n"
+      local u 
+      if t >= min and t <= max then u = (t - min) / (max - min) else t = -1 end
+      if u >=0 then
+        if g_field == "calculatedDoublingTime" 
+            or g_field == "actualDoublingDays" then
+          color = calcColor(0xff, 0x00, 0x00, 0x00, 0xff, 0xff, u)
+        else
+          color = calcColor(0x00, 0xff, 0xff, 0xff, 0x00, 0x00, u)
+        end
+        repl = repl .. "#" .. sAbbr .. "{fill: #" .. color .. ";}" ..
+               "<!-- " .. tostring(t) .. "-->\n"
       end
     end
   end

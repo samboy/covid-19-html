@@ -124,9 +124,9 @@ function calcColor(r1, g1, b1, r2, g2, b2, value)
      r2 < 0 or r2 > 255 or g2 < 0 or g2 > 255 or b2 < 0 or b2 > 255 then
     return '00ffff' -- Error
   end
-  r = (r1 * value + r2 * (1 - value)) / 2
-  g = (g1 * value + g2 * (1 - value)) / 2
-  b = (b1 * value + b2 * (1 - value)) / 2
+  r = (r2 * value + r1 * (1 - value)) / 2
+  g = (g2 * value + g1 * (1 - value)) / 2
+  b = (b2 * value + b1 * (1 - value)) / 2
   return string.format("%02x%02x%02x",r,g,b)
 end
 

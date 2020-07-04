@@ -6,7 +6,7 @@
 USmapSVG = [[
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="1020" height="593">
-<title>2020 US presidential election prediction</title>
+<title>Map of the United States</title>
 <!-- Source: https://en.wikipedia.org/wiki/File:ElectoralCollege2020.svg
      License: Public domain -->
 <defs>
