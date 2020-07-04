@@ -1,7 +1,28 @@
 # What this is
 
 This takes the data from https://github.com/nytimes/covid-19-data/ for
-a single county and converts it.
+a single county and converts it.  We can make tabular data or a SVG map
+of the Unites States visualizing data.
+
+# Making a SVG map
+
+To make a SVG map of the data, make sure one has Git and the 
+programming language Lua (5.1 or higher) installed.  Then, run
+the following commands:
+
+```sh
+git clone https://github.com/nytimes/covid-19-data/
+lua examine-growth.lua svg > map.svg
+```
+
+There are other options to the `examine-growth.lua` script, such as:
+
+* `lua examine-growth.lua csv Texas > texas.csv`
+* `lua examine-growth.lua cases Florida`
+* `lua examine-growth.lua svg casesPer100k > map.svg`
+
+One can get full command line options with 
+`lua examine-growth.lua --help`
 
 # Trying to predict growth
 
