@@ -363,10 +363,12 @@ if arg[1] == "svg" then
           color = calcColor(0x00, 0xff, 0xff, 0xff, 0x00, 0x00, u)
         end
         repl = repl .. "#" .. sAbbr .. "{fill: #" .. color .. ";}" ..
-               "<!-- " .. tostring(t) .. "-->\n"
+               " <!-- " .. tostring(t) .. "-->\n"
       end
     end
   end
+  repl = repl .. "<!-- MIN: " .. tostring(min) .. ", MAX: " 
+         .. tostring(max) .. "-->"
   out = string.gsub(USmapSVG,'<!..COLORS..>',repl)
   print(out)
 end
