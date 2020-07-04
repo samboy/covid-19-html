@@ -324,6 +324,7 @@ if arg[1] == 'cases' or arg[1] == 'csv' then
     os.exit(1)
   end
 
+  print(makeHeaderString())
   for date, data in sPairs(here.date) do
     line = makeString(date, data.cases, data.calculatedDoublingTime,
                       data.actualDoublingDays, data.delta, 
