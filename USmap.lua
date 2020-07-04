@@ -1,5 +1,5 @@
 -- This is a map of the United States in SVG format
--- to use, take the string <!--COLOR--> and replace it with something
+-- to use, take the string <!--COLORS--> and replace it with something
 -- like "#AL, #AZ {#fill: #ff8000;}"
 -- This file is public domain
 
