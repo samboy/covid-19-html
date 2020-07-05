@@ -60,7 +60,7 @@ For "cases", "csv", or "svg", subsequent arguments are:
 2. Day range: How many days do we average some numbers over. Default: 7
 3. Do deaths: If this is "1", process deaths, not cases. Default: 0
 
-If action is "hotSpots", list locations with possible dangerous growth.
+If action is hotSpots or hotSpots2, find possible "hot spots".
   ]=]
   os.exit(0)
 end
@@ -99,6 +99,7 @@ To see a reference manual, type in lua examine-growth.lua --help
   os.exit(0)
 end
 
+g_dayrange = 7
 if arg[1] == "cases" or arg[1] == "csv" then
   g_outputFormat = arg[1]
   g_search = arg[2] or "San Diego"
@@ -213,6 +214,8 @@ for state, here in sPairs(state) do
 end
 all["USA"] = USA
 all["USA"].pop = USpop
+
+maxCasesPer100k = 0
    
 -- Process the totals we have to get growth rates and other calculated data 
 for place, here in sPairs(all) do
@@ -284,18 +287,25 @@ for place, here in sPairs(all) do
     -- Cases per 100,000 people
     if here.pop and here.pop > 0 then
       today.casesPer100k = (today.cases / here.pop) * 100000
+      if today.casesPer100k > maxCasesPer100k then
+        maxCasesPer100k = today.casesPer100k
+      end
     end
 
+  end
+end
+
+for place, here in sPairs(all) do
+  for date, today in sPairs(here.date) do
     -- Estimate when we will have "Herd immunity".  Here, "Herd immunity"
     -- is how long, based on estimated doubling time, it would take
-    -- for 10% of the population to have a COVID-19 case (we presume the
+    -- for  of the population to have a COVID-19 case (we presume the
     -- other 90% are asymptomatic) 
     if here.pop and math.log(today.averageGrowth) > 0 and today.cases > 0 then
-      today.herdImmunityCalc = math.log((here.pop / 40) / today.cases) /
+      today.herdImmunityCalc = math.log((here.pop *
+	  (maxCasesPer100k / 100000)) / today.cases) /
           math.log(today.averageGrowth)
     end
-    -- When looking at deaths, "herd Immunity" is a meaningless number
-    if g_doDeaths then today.herdImmunityCalc = -1 end
 
   end
 end
@@ -330,6 +340,27 @@ end
 if arg[1] == 'hotSpots' then
   showHotSpots(heat, byHeat)
   os.exit(0)
+end
+
+if arg[1] == 'hotSpots2' then
+  local byCases = {}
+  local bySorter = {}
+  local b = 1
+  for place, here in pairs(all) do
+    if(here.pop) then
+      bySorter[b] = place
+      b = b + 1
+      byCases[place] = here.mostRecent.casesPer100k
+    end
+  end
+  table.sort(bySorter, function(y,z) return 
+    tonumber(byCases[y]) < tonumber(byCases[z]) 
+  end)
+  for a = 1, #bySorter do
+    if #bySorter - a < 30 then
+      print(bySorter[a], byCases[bySorter[a]])
+    end
+  end
 end
 
 -- Header string for tabulated output
