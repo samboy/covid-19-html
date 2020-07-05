@@ -48,12 +48,12 @@ a given county.  Should we have both a state and county with a name,
 we use the state name.  Avoid naming just a county without a state.
 Use "USA" to look at overall national numbers.  Default is "San Diego".
 
-If action is "svg", in the generated map green means things look good, red
-means things look bad.  The first optional argument is what to visualize.
-Can be one of "averageGrowth", (how much growth have we seen over the
-last "day range" days), "actualDoublingDays", "calculatedDoublingTime",
-"casesPer100k", or "herdImmunityCalc" (how long it would take for a large
-portion of the population to have COVID-19).  Default is "averageGrowth".
+If action is "svg", in the generated map green means good, red means
+bad.  The first optional argument is what to visualize.  Can be one of
+"averageGrowth" (how much growth have we seen over the last days),
+"actualDoublingDays", "calculatedDoublingTime", "casesPer100k",
+"casesPer100kLog", or "herdImmunityCalc" (how long it would take for 2.5%
+of population percent to have COVID-19).  Default is "averageGrowth".
 
 For "cases", "csv", or "svg", subsequent arguments are: 
 
@@ -114,6 +114,7 @@ if arg[1] == "svg" then
      g_field ~= "actualDoublingDays" and
      g_field ~= "calculatedDoublingTime" and
      g_field ~= "casesPer100k" and
+     g_field ~= "casesPer100kLog" and
      g_field ~= "herdImmunityCalc" then
     print("Invalid field to view for SVG map")
     os.exit(1)
@@ -290,7 +291,7 @@ for place, here in sPairs(all) do
     -- for 10% of the population to have a COVID-19 case (we presume the
     -- other 90% are asymptomatic) 
     if here.pop and math.log(today.averageGrowth) > 0 and today.cases > 0 then
-      today.herdImmunityCalc = math.log((here.pop / 10) / today.cases) /
+      today.herdImmunityCalc = math.log((here.pop / 40) / today.cases) /
           math.log(today.averageGrowth)
     end
     -- When looking at deaths, "herd Immunity" is a meaningless number
@@ -395,11 +396,17 @@ end
 if arg[1] == "svg" then
   max = 0
   min = 100000
+  local doLog = false
+  if g_field == "casesPer100kLog" then 
+    doLog = true 
+    g_field = "casesPer100k"
+  end
   -- Find "max" so we have 0 <-> 1 gradient
   for state, sAbbr in sPairs(stateNameAbbr) do
     if all and all[state] and all[state]["mostRecent"] and 
        all[state]["mostRecent"][g_field] then
       local t = all[state]["mostRecent"][g_field]
+      if doLog then t = math.log(t) / math.log(10) end -- Common log
       if t > max then max = t end
       if t < min then min = t end
     end
@@ -410,13 +417,15 @@ if arg[1] == "svg" then
     if all and all[state] and all[state]["mostRecent"] and
        all[state]["mostRecent"][g_field] then
       local t = all[state]["mostRecent"][g_field]
+      if doLog then t = math.log(t) / math.log(10) end -- Common log
       local u 
       if t >= min and t <= max then u = (t - min) / (max - min) else t = -1 end
       if u >=0 then
-        if g_field == "calculatedDoublingTime" 
-            or g_field == "actualDoublingDays" then
+        if g_field == "calculatedDoublingTime" or 
+            g_field == "herdImmunityCalc" or
+            g_field == "actualDoublingDays" then
           -- color = calcColor(0x80, 0x00, 0x00, 0x00, 0x80, 0x80, u)
-          color = calcColor(0xd2, 0x26, 0x32, 0x0b, 0xb2, 0xff, u)
+          color = calcColor(0xd2, 0x26, 0x32, 0x0b, 0xff, 0x20, u)
         else
           -- color = calcColor(0x00, 0x80, 0x80, 0x80, 0x00, 0x00, u)
           color = calcColor(0x0b, 0xff, 0x20, 0xd2, 0x26, 0x32, u)
