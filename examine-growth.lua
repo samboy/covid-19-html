@@ -151,7 +151,6 @@ if not pop["Louisiana"] then pop["Louisiana"]=4648794 end
   
 io.input("data.csv")
 all = {}
-g_dayrange = 7
 
 -- Initialize a given location's data
 function initPlaceData() 
