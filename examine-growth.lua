@@ -190,7 +190,11 @@ end
 state = {}
 USA = initPlaceData()
 for place, here in sPairs(all) do
-  if not state[here.state] then state[here.state] = initPlaceData() end
+  if not state[here.state] then 
+    state[here.state] = initPlaceData() 
+    state[here.state]["countyList"] = {} 
+  end
+  table.insert(state[here.state]["countyList"], place)
   for date, today in sPairs(here.date) do
     if not state[here.state].date[date] then 
       state[here.state].date[date] = {} 
@@ -483,6 +487,8 @@ if arg[1] == "gnuplot" then
   local dir = "GNUplot/"
   local fontnameSize = 'Caulixtla009Sans,12'
   for place, here in sPairs(all) do
+
+    -- Make the CSV data file
     local o = io.open(dir .. place .. ".csv", "w")
     if not o then 
       print("Error opening " .. dir .. place .. ".csv")
@@ -501,7 +507,8 @@ if arg[1] == "gnuplot" then
     end
     o:close()
     print(dir .. place .. ".csv written")
-    -- Make the file with GNUplot directions
+
+    -- Make the file with GNUplot directions (which uses the CSV file)
     o = io.open(dir .. place .. ".gnuplot", "w")
     if not o then 
       print("Error opening " .. dir .. place .. ".gnuplot")
@@ -519,6 +526,47 @@ set xlabel "Date"
 plot "]=] .. place .. 
 ".csv" .. '"' .. " using 1:2 with lines lw 4, '' using 1:3 with lines lw 4\n")
     o:close()
+
+    -- Make a simple HTML file with the graph
+    o = io.open(dir .. place .. ".html", "w")
+    if not o then 
+      print("Error opening " .. dir .. place .. ".html")
+      os.exit(1)
+    end
+    o:write("<html><head><title>COVID-19 doubling time for ")
+    o:write(place)
+    o:write("</title>\n")
+    o:write([=[<style>
+@media screen and (min-width: 641px) {
+        .page { width: 640px; margin-left: auto; margin-right: auto;
+                font-size: 20px; }
+}
+</style>]=])
+    o:write([=[
+</head>
+<body>
+<div class=page>
+]=] )
+    o:write("<h1>" .. place .. "</h1>\n")
+    o:write('<img src="' .. place .. '.png" width=100%%><br>' .. "\n")
+    o:write("<i>This image shows doubling time for " .. place .. "</i>\n")
+    o:write("<p>\n")
+    if state[place] then
+      o:write("County list:<p>\n")
+      for _,county in ipairs(state[place]["countyList"]) do
+        o:write('<a href="' .. county .. '.html">' .. county .. "</a><br>\n")
+      end
+    elseif place == "USA" then
+      o:write("State list:<p>\n")
+      for state,_ in sPairs(state) do
+        o:write('<a href="' .. state .. '.html">' .. state .. "</a><br>\n")
+      end
+    else
+      o:write('<a href="USA.html">Return to top</a><br>' .. "\n")
+    end
+    o:write("</body></html>\n")
+    o:close()
+
   end
 end
 
