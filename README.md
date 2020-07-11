@@ -1,8 +1,12 @@
 # What this is
 
-This takes the data from https://github.com/nytimes/covid-19-data/ for
-a single county and converts it.  We can make tabular data or a SVG map
-of the Unites States visualizing data.
+This makes a lot of visualizations of the data from
+https://github.com/nytimes/covid-19-data including:
+
+- A full website with web pages showing doubling time for each and every
+  county and state in the US
+- A map of the US showing per-state COVID-19 growth
+- CSV and ASCII tables showing growth for a given state or county
 
 # Demo
 
@@ -10,7 +14,7 @@ Go to https://samboy.github.io/covid-19-html/ to see what this
 program can do.  Go to https://www.samiam.org/COVID-19/ to see doubling
 time graphs for each and every county and state in the United States.
 
-# Making a webpage with graphs for each state
+# Making a webpage with doubling time graphs for each state
 
 Needed 
 
