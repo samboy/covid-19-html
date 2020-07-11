@@ -150,7 +150,7 @@ while line do
   USpop = USpop + population
 end
 io.close()
--- NUmbers obtained from the Wikipedia 2020-07-03
+-- Numbers obtained from the Wikipedia 2020-07-03
 if not pop["Alaska"] then pop["Alaska"]=710249 end
 if not pop["District of Columbia"] then pop["District of Columbia"]=705749 end
 if not pop["Louisiana"] then pop["Louisiana"]=4648794 end
@@ -557,9 +557,21 @@ plot "]=] .. place ..
     o:write("</i>\n")
     o:write("<p>\n")
     if state[place] then
+      local countyList = {}
       o:write("County list:<p>\n")
       for _,county in ipairs(state[place]["countyList"]) do
-        o:write('<a href="' .. county .. '.html">' .. county .. "</a><br>\n")
+        if all[county] and 
+           all[county].mostRecent and 
+           all[county].mostRecent.averageGrowth then
+          countyList[county] = tonumber(all[county].mostRecent.averageGrowth)
+        else
+          countyList[county] = 0
+        end
+      end
+      for county,grow in sPairs(countyList) do
+        growFormat = string.format("%.2f",(grow - 1) * 100)
+        o:write('<a href="' .. county .. '.html">' .. county .. "</a>")
+        o:write(' Growth rate: ' ..  growFormat .. "%<br>\n")
       end
     elseif place == "USA" then
       o:write("State list:<p>\n")
@@ -569,6 +581,9 @@ plot "]=] .. place ..
     else
       o:write('<a href="USA.html">Return to top</a><br>' .. "\n")
     end
+    o:write([=[
+<p><i>Data comes from <a href=https://github.com/nytimes/covid-19-data/
+>The New York Times</a></i>]=])
     o:write("</body></html>\n")
     o:close()
 
