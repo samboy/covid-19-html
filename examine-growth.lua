@@ -530,7 +530,12 @@ set xdata time
 set timefmt "%Y-%m-%d"
 set key left autotitle columnhead
 set ylabel "Doubling Time"
-set xlabel "Date"
+set xlabel "Date]=])
+    if here.mostRecentDate then
+      o:write(" (as of " .. here.mostRecentDate .. ")")
+    end
+    o:write("\n")
+    o:write([=[
 plot "]=] .. place .. 
 ".csv" .. '"' .. " using 1:2 with lines lw 4, '' using 1:3 with lines lw 4\n")
     o:close()
