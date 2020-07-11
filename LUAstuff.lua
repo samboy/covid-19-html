@@ -36,14 +36,17 @@ end
 --  I created this routine when I wanted to make a version of pairs()
 --  guaranteed to traverse a table in a (mostly) deterministic fashion.
 
-function sortedTableKeys(t)
+function sortedTableKeys(t, sortBy)
+  if not sortBy then
+    sortBy = function(y,z) return tostring(y) < tostring(z) end
+  end
   local a = {}
   local b = 1
   for k,_ in pairs(t) do -- pairs() use OK; will sort
     a[b] = k
     b = b + 1
   end
-  table.sort(a, function(y,z) return tostring(y) < tostring(z) end)
+  table.sort(a, sortBy)
   return a
 end
 
@@ -94,7 +97,7 @@ end
 -- a table in a sorted order, e.g.
 -- someTable = {foo = "bar", bar = "hello" , aaa = "zzz", aab = "xyz" }
 -- for key, value in sPairs(someTable) do print(key, value) end
-function sPairs(t)
+function sPairs(t, sortBy)
   local function _tableIter(t, _)
     local k = t.s[t.i]
     local v
@@ -109,7 +112,7 @@ function sPairs(t)
     end
   end
   local tt = {}
-  tt.s = sortedTableKeys(t)
+  tt.s = sortedTableKeys(t, sortBy)
   tt.t = t
   tt.i = 1
   return _tableIter, tt, nil
