@@ -523,7 +523,7 @@ if arg[1] == "gnuplot" then
       os.exit(1)
     end
     o:write("set terminal pngcairo size 960,540 enhanced font '" ..
-             fontnameSize .. "\n")
+             fontnameSize .. "'\n")
     o:write("set output '" .. place .. ".png'\n")
     o:write([=[set datafile separator ','
 set xdata time
