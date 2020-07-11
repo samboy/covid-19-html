@@ -498,8 +498,15 @@ if arg[1] == "gnuplot" then
     o:write(makeHeaderString("csv"))
     o:write("\n")
     for date, data in sPairs(here.date) do
+      local calculatedDoublingTime = data.calculatedDoublingTime
+      if calculatedDoublingTime > data.cases then
+        calculatedDoublingTime = data.cases
+      end
+      if calculatedDoublingTime > 100 then
+        calculatedDoublingTime = 100
+      end
       local line = makeString("csv",
-                      date, data.cases, data.calculatedDoublingTime,
+                      date, data.cases, calculatedDoublingTime,
                       data.actualDoublingDays, data.delta, 
                       data.deltaAverage, data.casesPer100k or 0, 
                       data.herdImmunityCalc or -1)
@@ -521,7 +528,7 @@ if arg[1] == "gnuplot" then
     o:write([=[set datafile separator ','
 set xdata time
 set timefmt "%Y-%m-%d"
-set key autotitle columnhead
+set key left autotitle columnhead
 set ylabel "Doubling Time"
 set xlabel "Date"
 plot "]=] .. place .. 
@@ -561,6 +568,12 @@ York Times</a> and the code to generate this page is open source and
     end
     o:write("</i>\n")
     o:write("<p>\n")
+    o:write([=[The above graph shows <i>doubling time</i>, i.e. the number
+of days it takes for cases to double.  The purple line is <i>calculated</i>
+doubling time: The number of days, based on 7-day average growth, for
+cases to double.  The green line is <i>actual</i> doubling time: How
+many days ago did we have half the number of cases.  In both cases,
+the higher the line, the slower the COVID-19 growth.<p>]=])
     if state[place] then
       local countyList = {}
       o:write("County list:<p>\n")
