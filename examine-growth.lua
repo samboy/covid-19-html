@@ -569,7 +569,8 @@ York Times</a> and the code to generate this page is open source and
 </i>
 ]=] )
     o:write("<h1>" .. place .. "</h1>\n")
-    o:write('<img src="' .. place .. '.png" width=100%%><br>' .. "\n")
+    o:write('<a href="' .. place .. '.png">')
+    o:write('<img src="' .. place .. '.png" width=100%%></a><br>' .. "\n")
     o:write("<i>This image shows doubling time for " .. place)
     if here.mostRecentDate then
       o:write(" as of " .. here.mostRecentDate)
