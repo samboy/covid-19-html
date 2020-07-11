@@ -540,13 +540,18 @@ plot "]=] .. place ..
     o:write([=[<style>
 @media screen and (min-width: 641px) {
         .page { width: 640px; margin-left: auto; margin-right: auto;
-                font-size: 20px; }
+                font-size: 18px; }
 }
 </style>]=])
     o:write([=[
 </head>
 <body>
 <div class=page>
+<i>This is a graph showing COVID-19 growth.  The data for this graph
+comes from <a href=https://github.com/nytimes/covid-19-data/>The New
+York Times</a> and the code to generate this page is open source and
+<a href=https://github.com/samboy/covid-19-html/>available on GitHub</a>.
+</i>
 ]=] )
     o:write("<h1>" .. place .. "</h1>\n")
     o:write('<img src="' .. place .. '.png" width=100%%><br>' .. "\n")
@@ -569,21 +574,31 @@ plot "]=] .. place ..
         end
       end
       for county,grow in sPairs(countyList) do
-        growFormat = string.format("%.2f",(grow - 1) * 100)
+        local growFormat = string.format("%.2f",(grow - 1) * 100)
         o:write('<a href="' .. county .. '.html">' .. county .. "</a>")
         o:write(' Growth rate: ' ..  growFormat .. "%<br>\n")
       end
     elseif place == "USA" then
+      o:write([=[<i>It is possible to get per-state and per-county growth
+information.  Click on a state below to get growth information about that
+state.  Click on a county from the state page to get growth information
+about a single county</i><p>]=])
       o:write("State list:<p>\n")
-      for state,_ in sPairs(state) do
-        o:write('<a href="' .. state .. '.html">' .. state .. "</a><br>\n")
+      -- Let's get per-state growth summary
+      for stateN,_ in sPairs(state) do
+        local growth = 0
+        if all[stateN] and 
+           all[stateN].mostRecent and 
+           all[stateN].mostRecent.averageGrowth then
+          growth = all[stateN].mostRecent.averageGrowth
+        end
+        local growFormat = string.format("%.2f",(growth - 1) * 100)
+        o:write('<a href="' .. stateN .. '.html">' .. stateN .. "</a>")
+        o:write(' Growth rate: ' ..  growFormat .. "%<br>\n")
       end
     else
       o:write('<a href="USA.html">Return to top</a><br>' .. "\n")
     end
-    o:write([=[
-<p><i>Data comes from <a href=https://github.com/nytimes/covid-19-data/
->The New York Times</a></i>]=])
     o:write("</body></html>\n")
     o:close()
 
