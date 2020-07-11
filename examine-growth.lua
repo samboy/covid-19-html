@@ -481,6 +481,7 @@ end
 -------------------- Make a bunch of files in GNUplot/ -------------------- 
 if arg[1] == "gnuplot" then
   local dir = "GNUplot/"
+  local fontnameSize = 'Caulixtla009Sans,12'
   for place, here in sPairs(all) do
     local o = io.open(dir .. place .. ".csv", "w")
     if not o then 
@@ -500,6 +501,24 @@ if arg[1] == "gnuplot" then
     end
     o:close()
     print(dir .. place .. ".csv written")
+    -- Make the file with GNUplot directions
+    o = io.open(dir .. place .. ".gnuplot", "w")
+    if not o then 
+      print("Error opening " .. dir .. place .. ".gnuplot")
+      os.exit(1)
+    end
+    o:write("set terminal pngcairo size 960,540 enhanced font '" ..
+             fontnameSize .. "\n")
+    o:write("set output '" .. place .. ".png'\n")
+    o:write([=[set datafile separator ','
+set xdata time
+set timefmt "%Y-%m-%d"
+set key autotitle columnhead
+set ylabel "Doubling Time"
+set xlabel "Date"
+plot "]=] .. place .. 
+".csv" .. '"' .. " using 1:2 with lines lw 4, '' using 1:3 with lines lw 4\n")
+    o:close()
   end
 end
 

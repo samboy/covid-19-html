@@ -1,1 +1,4 @@
 *.csv
+*.gnuplot
+*.csv
+*.html
