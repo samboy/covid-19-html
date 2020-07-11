@@ -7,7 +7,50 @@ of the Unites States visualizing data.
 # Demo
 
 Go to https://samboy.github.io/covid-19-html/ to see what this
-program can do.
+program can do.  Go to https://www.samiam.org/COVID-19/ to see doubling
+time graphs for each and every county and state in the United States.
+
+# Making a webpage with graphs for each state
+
+Needed 
+
+- Git
+- Lua
+- Gnuplot
+- Bash (Windows users: Install Cygwin)
+
+In this directory:
+
+```bash
+git clone https://github.com/nytimes/covid-19-data/
+cp covid-19-data/us-counties.csv data.csv
+lua examine-growth.lua gnuplot
+cd GNUplot/
+for FILE in *gnuplot ; do
+  gnuplot "$FILE"
+  echo "$FILE"
+done
+cp USA.html index.html
+```
+
+Once the New York Times repo is cloned:
+
+```bash
+cd covid-19-data/
+git pull origin master
+cd ..
+cp covid-19-data/us-counties.csv data.csv
+lua examine-growth.lua gnuplot
+cd GNUplot/
+for FILE in *gnuplot ; do
+  gnuplot "$FILE"
+  echo "$FILE"
+done
+cp USA.html index.html
+```
+
+The Lua script makes the .html files and the files needed to make
+the PNG graphs.  Gnuplot makes the physical PNG files.
 
 # Making a SVG map
 
