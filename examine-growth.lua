@@ -489,10 +489,11 @@ if arg[1] == "gnuplot" then
   local fontnameSize = 'Caulixtla009Sans,12'
   for place, here in sPairs(all) do
 
+    fname = string.gsub(place,"'","-")
     -- Make the CSV data file
-    local o = io.open(dir .. place .. ".csv", "w")
+    local o = io.open(dir .. fname .. ".csv", "w")
     if not o then 
-      print("Error opening " .. dir .. place .. ".csv")
+      print("Error opening " .. dir .. fname .. ".csv")
       os.exit(1)
     end
     o:write(makeHeaderString("csv"))
@@ -514,22 +515,22 @@ if arg[1] == "gnuplot" then
       o:write("\n")
     end
     o:close()
-    print(dir .. place .. ".csv written")
+    print(dir .. fname .. ".csv written")
 
     -- Make the file with GNUplot directions (which uses the CSV file)
-    o = io.open(dir .. place .. ".gnuplot", "w")
+    o = io.open(dir .. fname .. ".gnuplot", "w")
     if not o then 
-      print("Error opening " .. dir .. place .. ".gnuplot")
+      print("Error opening " .. dir .. fname .. ".gnuplot")
       os.exit(1)
     end
     o:write("set terminal pngcairo size 960,540 enhanced font '" ..
              fontnameSize .. "'\n")
-    o:write("set output '" .. place .. ".png'\n")
+    o:write("set output '" .. fname .. ".png'\n")
     if here.mostRecentDate then
-      o:write("set title 'COVID-19 doubling time for " .. place ..
+      o:write("set title 'COVID-19 doubling time for " .. fname ..
               " as of " .. here.mostRecentDate .. "'\n")
     else
-      o:write("set title 'COVID-19 doubling time for " .. place .. "'\n")
+      o:write("set title 'COVID-19 doubling time for " .. fname .. "'\n")
     end
     o:write([=[set datafile separator ','
 set xdata time
@@ -544,9 +545,9 @@ plot "]=] .. place ..
     o:close()
 
     -- Make a simple HTML file with the graph
-    o = io.open(dir .. place .. ".html", "w")
+    o = io.open(dir .. fname .. ".html", "w")
     if not o then 
-      print("Error opening " .. dir .. place .. ".html")
+      print("Error opening " .. dir .. fname .. ".html")
       os.exit(1)
     end
     o:write("<html><head><title>COVID-19 doubling time for ")
@@ -572,8 +573,8 @@ York Times</a> and the code to generate this page is open source and
 </i>
 ]=] )
     o:write("<h1>" .. place .. "</h1>\n")
-    o:write('<a href="' .. place .. '.png">')
-    o:write('<img src="' .. place .. '.png" width=100%%></a><br>' .. "\n")
+    o:write('<a href="' .. fname .. '.png">')
+    o:write('<img src="' .. fname .. '.png" width=100%%></a><br>' .. "\n")
     o:write("<i>This image shows doubling time for " .. place)
     if here.mostRecentDate then
       o:write(" as of " .. here.mostRecentDate)
