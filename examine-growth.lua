@@ -229,6 +229,7 @@ maxCasesPer100k = 0
 for place, here in sPairs(all) do
   for date, today in sPairs(here.date) do
     here.mostRecent = today 
+    here.mostRecentDate = date
     here.n = here.n + 1
 
     -- Calculate actual doubling time (when we had half the cases compared
@@ -549,7 +550,11 @@ plot "]=] .. place ..
 ]=] )
     o:write("<h1>" .. place .. "</h1>\n")
     o:write('<img src="' .. place .. '.png" width=100%%><br>' .. "\n")
-    o:write("<i>This image shows doubling time for " .. place .. "</i>\n")
+    o:write("<i>This image shows doubling time for " .. place)
+    if here.mostRecentDate then
+      o:write(" as of " .. here.mostRecentDate)
+    end
+    o:write("</i>\n")
     o:write("<p>\n")
     if state[place] then
       o:write("County list:<p>\n")
