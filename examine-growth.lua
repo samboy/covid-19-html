@@ -525,15 +525,18 @@ if arg[1] == "gnuplot" then
     o:write("set terminal pngcairo size 960,540 enhanced font '" ..
              fontnameSize .. "'\n")
     o:write("set output '" .. place .. ".png'\n")
+    if here.mostRecentDate then
+      o:write("set title 'COVID-19 doubling time for " .. place ..
+              " as of " .. here.mostRecentDate .. "'\n")
+    else
+      o:write("set title 'COVID-19 doubling time for " .. place .. "'\n")
+    end
     o:write([=[set datafile separator ','
 set xdata time
 set timefmt "%Y-%m-%d"
 set key left autotitle columnhead
 set ylabel "Doubling Time"
 set xlabel "Date]=])
-    if here.mostRecentDate then
-      o:write(" (as of " .. here.mostRecentDate .. ")")
-    end
     o:write("\n")
     o:write([=[
 plot "]=] .. place .. 
