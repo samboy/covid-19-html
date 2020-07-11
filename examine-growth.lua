@@ -549,7 +549,10 @@ plot "]=] .. place ..
     o:write("<html><head><title>COVID-19 doubling time for ")
     o:write(place)
     o:write("</title>\n")
-    o:write([=[<style>
+    o:write([=[<meta name="viewport"
+content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0"
+>
+<style>
 @media screen and (min-width: 641px) {
         .page { width: 640px; margin-left: auto; margin-right: auto;
                 font-size: 18px; }
