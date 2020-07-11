@@ -18,6 +18,11 @@ and red is high growth:
 
 	lua examine-growth.lua svg > map.svg
 
+We can also make a bunch of GNUplot graph commands in one sweep; this
+puts a bunch of files in the GNUplot directory:
+
+	lua examine-growth.lua gnuplot
+
 To see some more examples of usage:
 
 	lua examine-growth.lua --examples
@@ -124,7 +129,6 @@ if arg[1] == "svg" then
   g_doDeaths = arg[4] or false
   if arg[4] and tonumber(arg[4]) == 0 then g_doDeaths = false end
 end
-
 
 -------------------------------------------------------------------------
 -- Read by-county population data
@@ -364,8 +368,8 @@ if arg[1] == 'hotSpots2' then
 end
 
 -- Header string for tabulated output
-function makeHeaderString()
-  if g_outputFormat == "csv" then return
+function makeHeaderString(outputFormat)
+  if outputFormat == "csv" then return
     "Date,Doubling time (calculated days),Doubling time (actual days),Cases"
   else return
     "Date          Cases   Doubling time        New daily cases"
@@ -373,9 +377,10 @@ function makeHeaderString()
 end
     
 -- Make Output string once we have the data to output
-function makeString(date, cases,calculatedDoublingTime,actualDoublingDays,
+function makeString(outputFormat,
+        date, cases,calculatedDoublingTime,actualDoublingDays,
         delta, deltaAverage, casesPer100k, herdImmunityCalc)
-  if g_outputFormat == "csv" then
+  if outputFormat == "csv" then
     return string.format("%s,%f,%d,%d,%.2f,%.2f",date, calculatedDoublingTime,
       actualDoublingDays, cases, casesPer100k, herdImmunityCalc)
   else
@@ -412,9 +417,10 @@ if arg[1] == 'cases' or arg[1] == 'csv' then
     os.exit(1)
   end
 
-  print(makeHeaderString())
+  print(makeHeaderString(g_outputFormat))
   for date, data in sPairs(here.date) do
-    line = makeString(date, data.cases, data.calculatedDoublingTime,
+    line = makeString(g_outputFormat,
+                      date, data.cases, data.calculatedDoublingTime,
                       data.actualDoublingDays, data.delta, 
                       data.deltaAverage, data.casesPer100k, 
                       data.herdImmunityCalc or -1)
@@ -471,3 +477,29 @@ if arg[1] == "svg" then
   out = string.gsub(USmapSVG,'<!..COLORS..>',repl)
   print(out)
 end
+
+-------------------- Make a bunch of files in GNUplot/ -------------------- 
+if arg[1] == "gnuplot" then
+  local dir = "GNUplot/"
+  for place, here in sPairs(all) do
+    local o = io.open(dir .. place .. ".csv", "w")
+    if not o then 
+      print("Error opening " .. dir .. place .. ".csv")
+      os.exit(1)
+    end
+    o:write(makeHeaderString("csv"))
+    o:write("\n")
+    for date, data in sPairs(here.date) do
+      local line = makeString("csv",
+                      date, data.cases, data.calculatedDoublingTime,
+                      data.actualDoublingDays, data.delta, 
+                      data.deltaAverage, data.casesPer100k or 0, 
+                      data.herdImmunityCalc or -1)
+      o:write(line)
+      o:write("\n")
+    end
+    o:close()
+    print(dir .. place .. ".csv written")
+  end
+end
+
