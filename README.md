@@ -14,7 +14,10 @@ Go to https://samboy.github.io/covid-19-html/ to see what this
 program can do.  Go to https://www.samiam.org/COVID-19/ to see doubling
 time graphs for each and every county and state in the United States.
 
-# Making a webpage with doubling time graphs for each state
+# Making a website of doubling time graphs
+
+It is possible to use these scripts to make an entire website with
+doubling time graphs for each state and county in the US.
 
 Needed 
 
@@ -54,7 +57,7 @@ cp USA.html index.html
 ```
 
 The Lua script makes the .html files and the files needed to make
-the PNG graphs.  Gnuplot makes the physical PNG files.
+the PNG graphs.  Gnuplot makes the actual PNG files.
 
 # Making a SVG map
 
