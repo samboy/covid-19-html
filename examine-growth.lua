@@ -438,6 +438,7 @@ end
 
 function makeSVG(field)
   if not field then field = g_field end
+  if not field then field = "averageGrowth" end
   local max = 0
   local min = 100000
   local doLog = false
@@ -494,9 +495,16 @@ end
 if arg[1] == "gnuplot" or arg[1] == "website" then
   local dir = "GNUplot/"
   local fontnameSize = 'Caulixtla009Sans,12'
+
+  -- Create all of the web pages so we can explore growth by state and 
+  -- county
   for place, here in sPairs(all) do
 
+    -- Lua handles filenames with ' just fine.
+    -- GnuPlot, on the other hand, doesn't
     fname = string.gsub(place,"'","-")
+
+    ------------------------------------------------------------------------
     -- Make the CSV data file
     local o = io.open(dir .. fname .. ".csv", "w")
     if not o then 
@@ -524,6 +532,7 @@ if arg[1] == "gnuplot" or arg[1] == "website" then
     o:close()
     print(dir .. fname .. ".csv written")
 
+    ------------------------------------------------------------------------
     -- Make the file with GNUplot directions (which uses the CSV file)
     o = io.open(dir .. fname .. ".gnuplot", "w")
     if not o then 
@@ -551,6 +560,7 @@ plot "]=] .. place ..
 ".csv" .. '"' .. " using 1:2 with lines lw 4, '' using 1:3 with lines lw 4\n")
     o:close()
 
+    ------------------------------------------------------------------------
     -- Make a simple HTML file with the graph
     o = io.open(dir .. fname .. ".html", "w")
     if not o then 
@@ -612,6 +622,7 @@ the higher the line, the slower the COVID-19 growth.<p>]=])
         o:write('<a href="' .. fCountyName .. '.html">' .. county .. "</a>")
         o:write(' Growth rate: ' ..  growFormat .. "%<br>\n")
       end
+      o:write('<a href="index.html">Return to top</a><br>' .. "\n")
     elseif place == "USA" then
       o:write([=[<i>It is possible to get per-state and per-county growth
 information.  Click on a state below to get growth information about that
@@ -630,12 +641,51 @@ about a single county</i><p>]=])
         o:write('<a href="' .. stateN .. '.html">' .. stateN .. "</a>")
         o:write(' Growth rate: ' ..  growFormat .. "%<br>\n")
       end
+      o:write('<a href="index.html">Return to top</a><br>' .. "\n")
     else
-      o:write('<a href="USA.html">Return to top</a><br>' .. "\n")
+      o:write('<a href="index.html">Return to top</a><br>' .. "\n")
     end
-    o:write("</body></html>\n")
+    o:write("</div></body></html>\n")
     o:close()
 
   end
+ 
+  --------------------------------------------------------------------------
+  -- Now that we have all of the per-state and per-county pages (as well
+  -- as a top-level USA.html page), let's make an index which lets us
+  -- quickly see all of the hotspots
+
+  -- First, make a SVG file
+  local o = io.open(dir .. "hotSpots.svg", "w")
+  o:write(makeSVG())
+  o:close()
+  
+  local o = io.open(dir .. "index.html", "w")
+  o:write("<html><head><title>Sam Trenholme's COVID-19 tracker</title>")
+  o:write([=[<meta name="viewport"
+content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0"
+>
+<style>
+@media screen and (min-width: 641px) {
+        .page { width: 640px; margin-left: auto; margin-right: auto;
+                font-size: 18px; }
+}
+</style>]=])
+  o:write([=[
+</head>
+<body>
+<div class=page>
+<i>This is a map showing COVID-19 growth.  Red means fast growth; green 
+means slow growth.  The data for this graph
+comes from <a href=https://github.com/nytimes/covid-19-data/>The New
+York Times</a> and the code to generate this page is open source and
+<a href=https://github.com/samboy/covid-19-html/>available on GitHub</a>.
+</i>
+<p>
+<a href="hotSpots.svg"><img src="hotSpots.svg" width=100%></a><p>
+<a href="USA.html">Click or tap here to view doubling time for the US as
+a whole, with the option to tap on per-state and per-county links.</a>
+]=] )
+  o:write("</div></body></html>\n")
 end
 
