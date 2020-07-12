@@ -609,11 +609,14 @@ plot "]=] .. place ..
 content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0"
 >
 <style>
+@import url('font/inline-fonts.css');
 @media screen and (min-width: 641px) {
         .page { width: 640px; margin-left: auto; margin-right: auto;
                 font-size: 18px; }
 }
-body { font-family: Cambria, Arial, Serif; }
+body { font-family: Caulixtla, Serif; }
+h1 { font-weight: bold; }
+h2 { font-weight: bold; }
 </style>]=])
     o:write([=[
 </head>
@@ -735,11 +738,14 @@ about a single county</i><p>]=])
 content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0"
 >
 <style>
+@import url('font/inline-fonts.css');
 @media screen and (min-width: 641px) {
         .page { width: 640px; margin-left: auto; margin-right: auto;
                 font-size: 18px; }
 }
-body { font-family: Cambria, Arial, Serif; }
+body { font-family: Caulixtla, Serif; }
+h1 { font-weight: bold; }
+h2 { font-weight: bold; }
 </style>
 </head>
 <body>
