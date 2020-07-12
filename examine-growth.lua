@@ -601,7 +601,8 @@ the higher the line, the slower the COVID-19 growth.<p>]=])
       end
       for county,grow in sPairs(countyList) do
         local growFormat = string.format("%.2f",(grow - 1) * 100)
-        o:write('<a href="' .. county .. '.html">' .. county .. "</a>")
+        local fCountyName = string.gsub(county,"'","-")
+        o:write('<a href="' .. fCountyName .. '.html">' .. county .. "</a>")
         o:write(' Growth rate: ' ..  growFormat .. "%<br>\n")
       end
     elseif place == "USA" then
