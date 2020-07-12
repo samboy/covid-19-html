@@ -586,7 +586,7 @@ set ylabel "Doubling Time"
 set xlabel "Date]=])
     o:write("\n")
     o:write([=[
-plot "]=] .. place .. 
+plot "]=] .. fname .. 
 ".csv" .. '"' .. " using 1:2 with lines lw 4, '' using 1:3 with lines lw 4\n")
     o:close()
 
