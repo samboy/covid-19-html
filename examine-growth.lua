@@ -613,6 +613,7 @@ content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0"
         .page { width: 640px; margin-left: auto; margin-right: auto;
                 font-size: 18px; }
 }
+body { font-family: Cambria, Arial, Serif; }
 </style>]=])
     o:write([=[
 </head>
@@ -632,9 +633,14 @@ York Times</a> and the code to generate this page is open source and
       o:write(" as of " .. here.mostRecentDate)
     end
     o:write("</i>\n")
+    o:write("<p>\n")
     if here.mostRecent and here.mostRecent.cases then
-      o:write("<br>Cases: " .. tonumber(here.mostRecent.cases) .. "\n")
+      o:write("Cases: " .. tonumber(here.mostRecent.cases) .. "\n")
     end 
+    if here.mostRecent and here.mostRecent.deltaAverage then
+      o:write("<br>New cases (7-day average): " .. 
+              string.format("%.2f",here.mostRecent.deltaAverage) .. "\n")
+    end
     if here.mostRecent and here.mostRecent.averageGrowth then
       o:write("<br>Growth: " .. 
               string.format("%.2f",(here.mostRecent.averageGrowth - 1) * 100)..
@@ -733,6 +739,7 @@ content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0"
         .page { width: 640px; margin-left: auto; margin-right: auto;
                 font-size: 18px; }
 }
+body { font-family: Cambria, Arial, Serif; }
 </style>
 </head>
 <body>
