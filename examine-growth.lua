@@ -496,6 +496,35 @@ if arg[1] == "gnuplot" or arg[1] == "website" then
   local dir = "GNUplot/"
   local fontnameSize = 'Caulixtla009Sans,12'
 
+  -----------------------------------------------------------------------
+  -- Let's get per-state growth summaries
+  local growthByState = {}
+  local stateHTMLlist = ""
+  local stateHotSpots = ""
+  for stateN,_ in sPairs(state) do
+    local growth = 0
+    if all[stateN] and 
+       all[stateN].mostRecent and 
+       all[stateN].mostRecent.averageGrowth then
+      growthByState[stateN] = all[stateN].mostRecent.averageGrowth
+      growth = growthByState[stateN]
+    end
+    local growFormat = string.format("%.2f",(growth - 1) * 100)
+    stateHTMLlist = stateHTMLlist .. 
+        '<a href="' .. stateN .. '.html">' .. stateN .. "</a>" ..
+        ' Growth rate: ' ..  growFormat .. "%<br>\n"
+  end
+  local idx = 1
+  for stateN,growth in sPairs(growthByState, sortedByRevValue) do
+    if(idx <= 10) then
+      local growFormat = string.format("%.2f",(growth - 1) * 100)
+      stateHotSpots = stateHotSpots .. 
+        '<a href="' .. stateN .. '.html">' .. stateN .. "</a>" ..
+        ' Growth rate: ' ..  growFormat .. "%<br>\n"
+    end
+    idx = idx + 1
+  end
+
   -- Create all of the web pages so we can explore growth by state and 
   -- county
   for place, here in sPairs(all) do
@@ -629,18 +658,7 @@ information.  Click on a state below to get growth information about that
 state.  Click on a county from the state page to get growth information
 about a single county</i><p>]=])
       o:write("State list:<p>\n")
-      -- Let's get per-state growth summary
-      for stateN,_ in sPairs(state) do
-        local growth = 0
-        if all[stateN] and 
-           all[stateN].mostRecent and 
-           all[stateN].mostRecent.averageGrowth then
-          growth = all[stateN].mostRecent.averageGrowth
-        end
-        local growFormat = string.format("%.2f",(growth - 1) * 100)
-        o:write('<a href="' .. stateN .. '.html">' .. stateN .. "</a>")
-        o:write(' Growth rate: ' ..  growFormat .. "%<br>\n")
-      end
+      o:write(stateHTMLlist)
       o:write('<a href="index.html">Return to top</a><br>' .. "\n")
     else
       o:write('<a href="index.html">Return to top</a><br>' .. "\n")
@@ -670,8 +688,7 @@ content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0"
         .page { width: 640px; margin-left: auto; margin-right: auto;
                 font-size: 18px; }
 }
-</style>]=])
-  o:write([=[
+</style>
 </head>
 <body>
 <div class=page>
@@ -682,10 +699,22 @@ York Times</a> and the code to generate this page is open source and
 <a href=https://github.com/samboy/covid-19-html/>available on GitHub</a>.
 </i>
 <p>
-<a href="hotSpots.svg"><img src="hotSpots.svg" width=100%></a><p>
+<a href="hotSpots.svg"><img src="hotSpots.svg" width=100%></a><br>]=])
+  if all.USA.mostRecentDate then
+    o:write("\n<i>Map current as of " .. all.USA.mostRecentDate .. "</i><p>\n")
+  else
+    o:write("<p>\n")
+  end
+  o:write([=[
 <a href="USA.html">Click or tap here to view doubling time for the US as
 a whole, with the option to tap on per-state and per-county links.</a>
 ]=] )
+  o:write("\n")
+  o:write("<h2>Top 10 states</h2>\n")
+  o:write("This is a list of the 10 states with the most COVID-19 growth:\n")
+  o:write("<p>\n") 
+  o:write(stateHotSpots) 
+  o:write("\n") 
   o:write("</div></body></html>\n")
 end
 
