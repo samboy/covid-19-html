@@ -1,3 +1,3 @@
 #!/bin/sh
 
-rm -f *.html *.csv *.png *.gnuplot
+rm -f *.html *.csv *.png *.gnuplot *.svg
