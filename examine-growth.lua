@@ -627,6 +627,9 @@ York Times</a> and the code to generate this page is open source and
       o:write(" as of " .. here.mostRecentDate)
     end
     o:write("</i>\n")
+    if here.mostRecent and here.mostRecent.cases then
+      o:write("<br>Cases: " .. tonumber(here.mostRecent.cases) .. "\n")
+    end 
     if here.mostRecent and here.mostRecent.averageGrowth then
       o:write("<br>Growth: " .. 
               string.format("%.2f",(here.mostRecent.averageGrowth - 1) * 100)..
