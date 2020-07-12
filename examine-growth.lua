@@ -600,6 +600,11 @@ plot "]=] .. place ..
     o:write("<html><head><title>COVID-19 doubling time for ")
     o:write(place)
     o:write("</title>\n")
+    -- UTF-8 header
+    o:write('<meta http-equiv="Content-Type" ')
+    o:write('content="text/html; charset=utf-8">' .. "\n")
+    -- Yes, I have made this page work on cell phone sized screens
+    -- Also: Basic styling
     o:write([=[<meta name="viewport"
 content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0"
 >
@@ -674,6 +679,7 @@ the higher the line, the slower the COVID-19 growth.<p>]=])
         o:write('<a href="' .. fCountyName .. '.html">' .. county .. "</a>")
         o:write(' Growth rate: ' ..  growFormat .. "%<br>\n")
       end
+      o:write('<p><a href="USA.html">Return to USA</a> - ' .. "\n")
       o:write('<a href="index.html">Return to top</a><br>' .. "\n")
     elseif place == "USA" then
       o:write([=[<i>It is possible to get per-state and per-county growth
@@ -685,9 +691,15 @@ about a single county</i><p>]=])
       o:write('<p><a href="index.html">Return to top</a><br>' .. "\n")
     else
       if here.mostRecent and here.mostRecent.averageGrowth and
-         here.mostRecent.cases and here.mostRecent.cases > 100 then
+         here.mostRecent.cases and here.mostRecent.cases > 1000 then
         growthByCounty[place] = here.mostRecent.averageGrowth
       end
+      o:write('<p>')
+      if here.state then
+        o:write('<a href="' .. here.state .. '.html">Return to ')
+        o:write(here.state .. "</a> - \n")
+      end
+      o:write('<a href="USA.html">Return to USA</a> - ' .. "\n")
       o:write('<a href="index.html">Return to top</a><br>' .. "\n")
     end
     o:write("</div></body></html>\n")
@@ -707,6 +719,12 @@ about a single county</i><p>]=])
   
   local o = io.open(dir .. "index.html", "w")
   o:write("<html><head><title>Sam Trenholme's COVID-19 tracker</title>")
+
+  -- UTF-8 header
+  o:write('<meta http-equiv="Content-Type" ')
+  o:write('content="text/html; charset=utf-8">' .. "\n")
+
+  -- Yes, the page works on cell phones.  Also, styling.
   o:write([=[<meta name="viewport"
 content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0"
 >
@@ -725,6 +743,9 @@ comes from <a href=https://github.com/nytimes/covid-19-data/>The New
 York Times</a> and the code to generate this page is open source and
 <a href=https://github.com/samboy/covid-19-html/>available on GitHub</a>.
 </i>
+<p>
+<a href=USA.html>Also available: Overall, per state, and per county 
+doubling time graphs</a>
 <p>
 <a href="hotSpots.svg"><img src="hotSpots.svg" width=100%></a><br>]=])
   if all.USA.mostRecentDate then
@@ -755,6 +776,9 @@ a whole, with the option to tap on per-state and per-county links.</a>
     end
   end 
   o:write("<p>Note that some of these may be prison outbreaks.\n")
-  o:write("</div></body></html>\n")
+  o:write([=[<h1>See also</h2>
+<a href=https://www.nytimes.com/interactive/2020/us/coronavirus-us-cases.html
+>NY Times interactive map showing per-county COVID-19 growth</a>]=])
+  o:write("\n</div></body></html>\n")
 end
 
