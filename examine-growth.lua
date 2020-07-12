@@ -435,30 +435,32 @@ if arg[1] == 'cases' or arg[1] == 'csv' then
 end
 
 -------------------- make a map of a single datapoint --------------------
-if arg[1] == "svg" then
-  max = 0
-  min = 100000
+
+function makeSVG(field)
+  if not field then field = g_field end
+  local max = 0
+  local min = 100000
   local doLog = false
-  if g_field == "casesPer100kLog" then 
+  if field == "casesPer100kLog" then 
     doLog = true 
-    g_field = "casesPer100k"
+    field = "casesPer100k"
   end
   -- Find "max" so we have 0 <-> 1 gradient
   for state, sAbbr in sPairs(stateNameAbbr) do
     if all and all[state] and all[state]["mostRecent"] and 
-       all[state]["mostRecent"][g_field] then
-      local t = all[state]["mostRecent"][g_field]
+       all[state]["mostRecent"][field] then
+      local t = all[state]["mostRecent"][field]
       if doLog then t = math.log(t) / math.log(10) end -- Common log
       if t > max then max = t end
       if t < min then min = t end
     end
   end
   -- Make a string with a color for each state
-  repl = ""
+  local repl = ""
   for state, sAbbr in sPairs(stateNameAbbr) do
     if all and all[state] and all[state]["mostRecent"] and
-       all[state]["mostRecent"][g_field] then
-      local t = all[state]["mostRecent"][g_field]
+       all[state]["mostRecent"][field] then
+      local t = all[state]["mostRecent"][field]
       if doLog then t = math.log(t) / math.log(10) end -- Common log
       local u 
       if t >= min and t <= max then u = (t - min) / (max - min) else t = -1 end
@@ -479,12 +481,17 @@ if arg[1] == "svg" then
   end
   repl = repl .. "<!-- MIN: " .. tostring(min) .. ", MAX: " 
          .. tostring(max) .. "-->"
-  out = string.gsub(USmapSVG,'<!..COLORS..>',repl)
-  print(out)
+  local out = string.gsub(USmapSVG,'<!..COLORS..>',repl)
+  return out
 end
 
--------------------- Make a bunch of files in GNUplot/ -------------------- 
-if arg[1] == "gnuplot" then
+if arg[1] == "svg" then
+  print(makeSVG())
+  os.exit(0)
+end
+
+-------------------- Make an entire website in GNUplot/ -------------------- 
+if arg[1] == "gnuplot" or arg[1] == "website" then
   local dir = "GNUplot/"
   local fontnameSize = 'Caulixtla009Sans,12'
   for place, here in sPairs(all) do
