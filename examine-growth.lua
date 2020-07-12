@@ -525,6 +525,7 @@ if arg[1] == "gnuplot" or arg[1] == "website" then
     idx = idx + 1
   end
 
+  local growthByCounty = {} 
   -- Create all of the web pages so we can explore growth by state and 
   -- county
   for place, here in sPairs(all) do
@@ -626,6 +627,25 @@ York Times</a> and the code to generate this page is open source and
       o:write(" as of " .. here.mostRecentDate)
     end
     o:write("</i>\n")
+    if here.mostRecent and here.mostRecent.averageGrowth then
+      o:write("<br>Growth: " .. 
+              string.format("%.2f",(here.mostRecent.averageGrowth - 1) * 100)..
+              "%\n")
+    end 
+    if here.mostRecent and here.mostRecent.calculatedDoublingTime then
+      if here.mostRecent.calculatedDoublingTime < 100 then
+        o:write("<br>Doubling days (calculated): " .. 
+                string.format("%.2f",here.mostRecent.calculatedDoublingTime) ..
+                "\n")
+      else
+        o:write("<br>Doubling days (calculated): > 100\n")
+      end
+    end 
+    if here.mostRecent and here.mostRecent.actualDoublingDays then
+      o:write("<br>Doubling days (actual): " .. 
+              string.format("%.2f",here.mostRecent.actualDoublingDays) ..
+              "\n")
+    end 
     o:write("<p>\n")
     o:write([=[The above graph shows <i>doubling time</i>, i.e. the number
 of days it takes for cases to double.  The purple line is <i>calculated</i>
@@ -661,6 +681,9 @@ about a single county</i><p>]=])
       o:write(stateHTMLlist)
       o:write('<a href="index.html">Return to top</a><br>' .. "\n")
     else
+      if here.mostRecent and here.mostRecent.averageGrowth then
+        growthByCounty[place] = here.mostRecent.averageGrowth
+      end
       o:write('<a href="index.html">Return to top</a><br>' .. "\n")
     end
     o:write("</div></body></html>\n")
@@ -715,6 +738,19 @@ a whole, with the option to tap on per-state and per-county links.</a>
   o:write("<p>\n") 
   o:write(stateHotSpots) 
   o:write("\n") 
+  o:write("<h2>Top 20 counties</h2>\n")
+  o:write("This is a list of the 20 counties with the most COVID-19 growth:\n")
+  o:write("<p>\n") 
+  local iex = 1
+  for countyN, growth in sPairs(growthByCounty, sortedByRevValue) do
+    if(iex < 20) and not string.match(countyN,'Unknown') then
+      local growFormat = string.format("%.2f",(growth - 1) * 100)
+      o:write('<a href="' .. countyN .. '.html">' .. countyN .. "</a>" ..
+        ' Growth rate: ' ..  growFormat .. "%<br>\n")
+      iex = iex + 1
+    end
+  end 
+  o:write("<p>Note that some of these may be prison outbreaks.\n")
   o:write("</div></body></html>\n")
 end
 
