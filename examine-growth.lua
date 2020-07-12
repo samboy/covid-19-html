@@ -679,9 +679,10 @@ state.  Click on a county from the state page to get growth information
 about a single county</i><p>]=])
       o:write("State list:<p>\n")
       o:write(stateHTMLlist)
-      o:write('<a href="index.html">Return to top</a><br>' .. "\n")
+      o:write('<p><a href="index.html">Return to top</a><br>' .. "\n")
     else
-      if here.mostRecent and here.mostRecent.averageGrowth then
+      if here.mostRecent and here.mostRecent.averageGrowth and
+         here.mostRecent.cases and here.mostRecent.cases > 100 then
         growthByCounty[place] = here.mostRecent.averageGrowth
       end
       o:write('<a href="index.html">Return to top</a><br>' .. "\n")
