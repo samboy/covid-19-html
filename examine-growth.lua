@@ -187,7 +187,15 @@ while line do
   today.deaths = tonumber(fields[6]) or 0
 end
 
--- Add up numbers in a state to get a by-state total
+----------------------------------------------------------------------------
+-- Add up numbers in a state to get a by-state total.
+-- Also generates nation-wide total, as well as a combined total for all
+-- red states as well as a total for blue states.
+--
+-- red/blue here is the affiliation of the Governor (Democrat: blue
+-- Republican: red).  For this dataset, we consider Puerto Rico's 
+-- governor to be "red", even though Garced was Democrat until 2019.
+
 state = {}
 USA = initPlaceData()
 stateByGov = {}
