@@ -202,6 +202,14 @@ for place, here in sPairs(all) do
      stateGovernor[stateNameAbbr[here.state]] then
     stateColor = tostring(stateGovernor[stateNameAbbr[here.state]])
   end
+
+  -- Yes, all states now have a color properly assigned to them
+  -- But, should that ever change....
+  if stateColor ~= "red" and stateColor ~= "blue" then
+    print("No color for state " .. here.state .. "\n")
+    os.exit(1)
+  end
+
   if not stateByGov[stateColor] then
     stateByGov[stateColor] = initPlaceData()
   end
