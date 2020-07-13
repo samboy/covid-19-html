@@ -2,6 +2,7 @@
 
 require("LUAstuff")
 require("stateNameAbbr")
+require("governors")
 require("USmap")
 -------------------------------- process args --------------------------------
 
@@ -189,31 +190,55 @@ end
 -- Add up numbers in a state to get a by-state total
 state = {}
 USA = initPlaceData()
+stateByGov = {}
 for place, here in sPairs(all) do
   if not state[here.state] then 
     state[here.state] = initPlaceData() 
     state[here.state]["countyList"] = {} 
   end
+
+  local stateColor = "none"
+  if here.state and stateNameAbbr[here.state] and
+     stateGovernor[stateNameAbbr[here.state]] then
+    stateColor = tostring(stateGovernor[stateNameAbbr[here.state]])
+  end
+  if not stateByGov[stateColor] then
+    stateByGov[stateColor] = initPlaceData()
+  end
+
   table.insert(state[here.state]["countyList"], place)
   for date, today in sPairs(here.date) do
     if not state[here.state].date[date] then 
       state[here.state].date[date] = {} 
     end
     if not USA.date[date] then USA.date[date] = {} end
+    if not stateByGov[stateColor].date[date] then 
+      stateByGov[stateColor].date[date] = {}
+    end
     if not state[here.state].date[date].cases then
       state[here.state].date[date].cases = 0
     end
     if not USA.date[date].cases then USA.date[date].cases = 0 end
+    if not stateByGov[stateColor].date[date].cases then 
+      stateByGov[stateColor].date[date].cases = 0 
+    end
     if not state[here.state].date[date].deaths then
       state[here.state].date[date].deaths = 0
     end
     if not USA.date[date].deaths then USA.date[date].deaths = 0 end
+    if not stateByGov[stateColor].date[date].deaths then 
+      stateByGov[stateColor].date[date].deaths = 0 
+    end
     state[here.state].date[date].cases = state[here.state].date[date].cases +
         today.cases
     state[here.state].date[date].deaths = state[here.state].date[date].deaths +
         today.deaths
     USA.date[date].cases = USA.date[date].cases + today.cases
     USA.date[date].deaths = USA.date[date].deaths + today.deaths
+    stateByGov[stateColor].date[date].cases =
+        stateByGov[stateColor].date[date].cases + today.cases
+    stateByGov[stateColor].date[date].deaths =
+        stateByGov[stateColor].date[date].deaths + today.deaths
   end
 end
 for state, here in sPairs(state) do
@@ -222,6 +247,10 @@ for state, here in sPairs(state) do
 end
 all["USA"] = USA
 all["USA"].pop = USpop
+
+-- Add fields for red states and blue states
+all["redStates"] = stateByGov["red"]
+all["blueStates"] = stateByGov["blue"]
 
 maxCasesPer100k = 0
    
