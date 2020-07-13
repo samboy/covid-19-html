@@ -489,8 +489,12 @@ function makeSVG(field)
        all[state]["mostRecent"][field] then
       local t = all[state]["mostRecent"][field]
       if doLog then t = math.log(t) / math.log(10) end -- Common log
-      if t > max then max = t end
-      if t < min then min = t end
+      -- Only use states visible on map to determine red/green balance
+      if sAbbr ~= "VI" and sAbbr ~= "MP" and sAbbr ~= "GU" and
+         sAbbr ~= "PR" then
+        if t > max then max = t end
+        if t < min then min = t end
+      end
     end
   end
   -- Make a string with a color for each state
@@ -502,7 +506,7 @@ function makeSVG(field)
       if doLog then t = math.log(t) / math.log(10) end -- Common log
       local u 
       if t >= min and t <= max then u = (t - min) / (max - min) else t = -1 end
-      if u >=0 and u <= 1 then
+      if u and u >= 0 and u <= 1 then
         if g_field == "calculatedDoublingTime" or 
             g_field == "herdImmunityCalc" or
             g_field == "actualDoublingDays" then
@@ -808,6 +812,11 @@ doubling time graphs</a>
 a whole, with the option to tap on per-state and per-county links.</a>
 ]=] )
   o:write("\n")
+  o:write("<h2>States by political affiliation of governor</h2>\n")
+  o:write("This is the number of total COVID-19 cases for states where the\n")
+  o:write("governor has a given political affiliation.<p>\n")
+  o:write("<a href=blueStates.html>Democrat governors</a><br>\n")
+  o:write("<a href=redStates.html>Republican governors</a>\n")
   o:write("<h2>Top 10 states</h2>\n")
   o:write("This is a list of the 10 states with the most COVID-19 growth:\n")
   o:write("<p>\n") 
