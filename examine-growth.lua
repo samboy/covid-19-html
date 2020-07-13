@@ -412,7 +412,8 @@ end
 -- Header string for tabulated output
 function makeHeaderString(outputFormat)
   if outputFormat == "csv" then return
-    "Date,Doubling time (calculated days),Doubling time (actual days),Cases"
+"Date,Doubling time (calculated days),Doubling time (actual days),Cases," ..
+"Growth percentage"
   else return
     "Date          Cases   Doubling time        New daily cases"
   end
@@ -421,10 +422,13 @@ end
 -- Make Output string once we have the data to output
 function makeString(outputFormat,
         date, cases,calculatedDoublingTime,actualDoublingDays,
-        delta, deltaAverage, casesPer100k, herdImmunityCalc)
+        delta, deltaAverage, casesPer100k, herdImmunityCalc,
+        averageGrowth)
   if outputFormat == "csv" then
-    return string.format("%s,%f,%d,%d,%.2f,%.2f",date, calculatedDoublingTime,
-      actualDoublingDays, cases, casesPer100k, herdImmunityCalc)
+    return string.format("%s,%f,%d,%d,%.2f,%.2f,%.2f",date, 
+      calculatedDoublingTime,
+      actualDoublingDays, cases, casesPer100k, herdImmunityCalc,
+      (averageGrowth - 1) * 100)
   else
     return string.format("%s %8d %8.2f %8d %8d %8.2f",date, cases,
       calculatedDoublingTime, actualDoublingDays,
@@ -465,7 +469,8 @@ if arg[1] == 'cases' or arg[1] == 'csv' then
                       date, data.cases, data.calculatedDoublingTime,
                       data.actualDoublingDays, data.delta, 
                       data.deltaAverage, data.casesPer100k, 
-                      data.herdImmunityCalc or -1)
+                      data.herdImmunityCalc or -1,
+                      data.averageGrowth)
     print(line)
   end
   os.exit(0)
@@ -596,7 +601,8 @@ if arg[1] == "gnuplot" or arg[1] == "website" then
                       date, data.cases, calculatedDoublingTime,
                       data.actualDoublingDays, data.delta, 
                       data.deltaAverage, data.casesPer100k or 0, 
-                      data.herdImmunityCalc or -1)
+                      data.herdImmunityCalc or -1,
+                      data.averageGrowth)
       o:write(line)
       o:write("\n")
     end
