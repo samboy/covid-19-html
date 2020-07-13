@@ -160,6 +160,12 @@ function calcColor(r1, g1, b1, r2, g2, b2, value)
   local r = (r2 * value + r1 * (1 - value)) 
   local g = (g2 * value + g1 * (1 - value)) 
   local b = (b2 * value + b1 * (1 - value)) 
+  if r < 0 or r > 255 then return '00ffff' end
+  if g < 0 or g > 255 then return '00ffff' end
+  if b < 0 or b > 255 then return '00ffff' end
+  r = math.floor(r + 0.5)
+  g = math.floor(g + 0.5)
+  b = math.floor(b + 0.5)
   return string.format("%02x%02x%02x",r,g,b)
 end
 

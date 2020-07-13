@@ -502,7 +502,7 @@ function makeSVG(field)
       if doLog then t = math.log(t) / math.log(10) end -- Common log
       local u 
       if t >= min and t <= max then u = (t - min) / (max - min) else t = -1 end
-      if u >=0 then
+      if u >=0 and u <= 1 then
         if g_field == "calculatedDoublingTime" or 
             g_field == "herdImmunityCalc" or
             g_field == "actualDoublingDays" then
