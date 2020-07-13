@@ -4,6 +4,96 @@ require("LUAstuff")
 require("stateNameAbbr")
 require("governors")
 require("USmap")
+
+---------------------------------------------------------------------------
+-- Process the totals we have to get growth rates and other calculated data 
+-- Input: A table which has a lot of data about COVID-19 cases and
+-- deaths; useDeaths, a boolean, that, if true, means we process deaths,
+-- not cases
+-- Output: The maximum number of cases per 100,000 people we saw
+-- Side effects: We add a lot of data to ourCOVIDtable
+function processCOVIDtable(ourCOVIDtable, useDeaths)
+  local maxCasesPer100k = 0
+  for place, here in sPairs(ourCOVIDtable) do
+    for date, today in sPairs(here.date) do
+      here.mostRecent = today 
+      here.mostRecentDate = date
+      here.n = here.n + 1
+
+      -- Calculate actual doubling time (when we had half the cases compared
+      -- to a given day)
+      if useDeaths then
+        today.cases = today.deaths
+      end
+      here.noHalf = 0
+      here.casesHistory[here.n] = today.cases
+      while here.casesHistory[here.hadHalf] and 
+          here.casesHistory[here.hadHalf] < (today.cases / 2) do
+        here.hadHalf = here.hadHalf + 1
+        if here.hadHalf > here.n then
+          here.noHalf = 1
+          here.hadHalf = 1
+          break
+        end
+      end
+      if here.hadHalf > 1 and here.noHalf == 0 then
+        today.actualDoublingDays = 1 + here.n - here.hadHalf
+      else
+        today.actualDoublingDays = 0
+      end
+
+      -- Calculate an average growth over a range of days
+      today.growth = 0
+      if here.last > 0 then
+        today.growth = today.cases / here.last
+      else
+        today.growth = 0
+      end
+      here.rollingAverage[here.n % g_dayrange] = today.growth
+      today.sum = 0
+      for a = 0, g_dayrange do
+        if here.rollingAverage[a] then
+          today.sum = today.sum + here.rollingAverage[a]
+        end
+      end
+      today.averageGrowth = today.sum / g_dayrange
+
+      -- Calculate the yesterday and average daily increase in cases
+      today.delta = today.cases - here.last
+      here.deltaList[here.n % g_dayrange] = today.delta
+      today.deltaSum = 0
+      for a = 0, g_dayrange do
+        if here.deltaList[a] then
+          today.deltaSum = today.deltaSum + here.deltaList[a]
+        end 
+      end
+      if g_dayrange > 0 then
+        today.deltaAverage = today.deltaSum / g_dayrange
+      end
+
+      -- Last is yesterday's case count
+      here.last = today.cases
+
+      -- Calculate the projected doubling time
+      today.calculatedDoublingTime = 0
+      if g_dayrange > 0 and math.log(today.averageGrowth) > 0 then
+        today.calculatedDoublingTime = 
+            math.log(2) / math.log(today.averageGrowth)
+      end
+
+      -- Cases per 100,000 people
+      if here.pop and here.pop > 0 then
+        today.casesPer100k = (today.cases / here.pop) * 100000
+        if today.casesPer100k > maxCasesPer100k then
+          maxCasesPer100k = today.casesPer100k
+        end
+      end
+
+    end
+  end
+  return maxCasesPer100k
+end
+
 -------------------------------- process args --------------------------------
 
 if #arg == 0 then
@@ -268,86 +358,7 @@ all["USA"].pop = USpop
 all["redStates"] = stateByGov["red"]
 all["blueStates"] = stateByGov["blue"]
 
-maxCasesPer100k = 0
-   
--- Process the totals we have to get growth rates and other calculated data 
-for place, here in sPairs(all) do
-  for date, today in sPairs(here.date) do
-    here.mostRecent = today 
-    here.mostRecentDate = date
-    here.n = here.n + 1
-
-    -- Calculate actual doubling time (when we had half the cases compared
-    -- to a given day)
-    if g_doDeaths then
-      today.cases = today.deaths
-    end
-    here.noHalf = 0
-    here.casesHistory[here.n] = today.cases
-    while here.casesHistory[here.hadHalf] and 
-        here.casesHistory[here.hadHalf] < (today.cases / 2) do
-      here.hadHalf = here.hadHalf + 1
-      if here.hadHalf > here.n then
-        here.noHalf = 1
-        here.hadHalf = 1
-        break
-      end
-    end
-    if here.hadHalf > 1 and here.noHalf == 0 then
-      today.actualDoublingDays = 1 + here.n - here.hadHalf
-    else
-      today.actualDoublingDays = 0
-    end
-
-    -- Calculate an average growth over a range of days
-    today.growth = 0
-    if here.last > 0 then
-      today.growth = today.cases / here.last
-    else
-      today.growth = 0
-    end
-    here.rollingAverage[here.n % g_dayrange] = today.growth
-    today.sum = 0
-    for a = 0, g_dayrange do
-      if here.rollingAverage[a] then
-        today.sum = today.sum + here.rollingAverage[a]
-      end
-    end
-    today.averageGrowth = today.sum / g_dayrange
-
-    -- Calculate the yesterday and average daily increase in cases
-    today.delta = today.cases - here.last
-    here.deltaList[here.n % g_dayrange] = today.delta
-    today.deltaSum = 0
-    for a = 0, g_dayrange do
-      if here.deltaList[a] then
-        today.deltaSum = today.deltaSum + here.deltaList[a]
-      end 
-    end
-    if g_dayrange > 0 then
-      today.deltaAverage = today.deltaSum / g_dayrange
-    end
-
-    -- Last is yesterday's case count
-    here.last = today.cases
-
-    -- Calculate the projected doubling time
-    today.calculatedDoublingTime = 0
-    if g_dayrange > 0 and math.log(today.averageGrowth) > 0 then
-      today.calculatedDoublingTime = 
-          math.log(2) / math.log(today.averageGrowth)
-    end
-
-    -- Cases per 100,000 people
-    if here.pop and here.pop > 0 then
-      today.casesPer100k = (today.cases / here.pop) * 100000
-      if today.casesPer100k > maxCasesPer100k then
-        maxCasesPer100k = today.casesPer100k
-      end
-    end
-
-  end
-end
+maxCasesPer100k = processCOVIDtable(all, g_doDeaths)
 
 for place, here in sPairs(all) do
   for date, today in sPairs(here.date) do
