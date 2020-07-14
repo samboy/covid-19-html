@@ -659,9 +659,9 @@ plot "]=] .. fname ..
     os.exit(1)
   end
   if isDeath then
-    o:write("<html><head><title>COVID-19 doubling time for ")
-  else
     o:write("<html><head><title>COVID-19 deaths for ")
+  else
+    o:write("<html><head><title>COVID-19 doubling time for ")
   end
   o:write(place)
   o:write("</title>\n")
