@@ -278,6 +278,29 @@ while line do
 end
 
 ----------------------------------------------------------------------------
+-- The attangement of the data created above is as follows:
+-- covidData is a table.  Each key is a string.  The string
+-- is a place name, like "San Diego,California" or 
+-- "Miami-Dade,Florida".  Each value is itself a table
+-- That "place" table has the following fields:
+-- casesHistory: Used to determine how long ago we had 1/2 of the cases
+--               (accounting field for calculations)
+-- rollingAverage: Used to determine the (usually) 7-day average growth
+-- deltaList: Used to determine the 7-day average of new cases
+-- n: Used with rollingAverage and deltaList to know which index to fetch
+--    on a given day (another accounting field for calculations)
+-- hadHalf: When we last saw 1/2 the cases (accounting field)
+-- last: Previous day's cases (or deaths) (accounting field)
+-- date: This is the only field we need to look at once things
+--       are calculated.  This is a table where the keys are ISO dates
+--       (e.g. "2020-07-12" as a string); each element of the date
+--       table is a table which starts off with two values: "cases" and
+--       "deaths" (the total cumulative cases and deaths for a given day
+--       at a given place)
+-- Note that we will add a bunch more data to this table later, but this
+-- is how things start off.
+
+----------------------------------------------------------------------------
 -- Add up numbers in a state to get a by-state total.
 -- Also generates nation-wide total, as well as a combined total for all
 -- red states as well as a total for blue states.
@@ -358,10 +381,41 @@ covidData["USA"].pop = USpop
 covidData["redStates"] = stateByGov["red"]
 covidData["blueStates"] = stateByGov["blue"]
 
+-----------------------------------------------------------------------------
+-- OK, back to that covidData table.  We have filled it out some more.  
+-- We have, at the top level, added a bunch of places: There are now 55
+-- states and territories added to the table ("California", "Florida",
+-- etc.) which have the total cases and deaths each day for those places.  
+-- In -- addition we have the special "USA" (total cases and deaths per 
+-- day) field, as well as "redStates" (states with a Republican governor)
+-- and "blueStates" (Democrat governor)
+-- The structure is the same:
+-- place.date.2020-XX-XX.cases and place.date.2020-XX-XX.deaths, where
+-- "place" is "California", "San Diego,California", "USA", etc. and XX-XX
+-- is a different element for each day.  Cases and deaths are cumulative.
+-- Now, let's add a bunch of information to those tables:
 covidCases = tableCopyD(covidData)
 covidDeaths = tableCopyD(covidData)
 maxCasesPer100k = processCOVIDtable(covidCases, false)
 processCOVIDtable(covidDeaths, true)
+-- And now we have covidCases and covidDeaths which have taken the cases 
+-- and deaths, and have added a bunch of other fields, including:
+-- place.date.2020-XX-XX.actualDoublingDays: How many days did we have
+-- 	half of today's cases/deaths
+-- place.date.2020-XX-XX.averageGrowth: (Usually) 7-day average growth,
+-- 	as an absolute number (e.g. 1% growth is 1.01)
+-- place.date.2020-XX-XX.deltaAverage: 7-day increase in the number of cases
+-- place.date.2020-XX-XX.calculatedDoublingTime: Based on average growth,
+--      how many days would it take for cases to double.
+-- place.date.2020-XX-XX.casesPer100k: How many cases per 100,000 people.
+--      This information is not always available (Population data is
+--      incomplete)
+-- (place is a name like "San Diego,California" or "USA"; 2020-XX-XX is
+--  a date and we have all the above information for each day in our table)
+-- The table "covidCases" is calculates all the above for cases; the table
+-- "covidDeaths" calculates all of the above for deaths.  Note that, for
+-- both tables place.date.2020-XX-XX.cases is always cases, and
+-- place.date.2020-XX-XX.deaths is always deaths.
 
 if g_doDeaths then 
   all = covidDeaths
