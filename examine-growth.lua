@@ -247,7 +247,7 @@ if not pop["District of Columbia"] then pop["District of Columbia"]=705749 end
 if not pop["Louisiana"] then pop["Louisiana"]=4648794 end
   
 io.input("data.csv")
-all = {}
+covidData = {}
 
 -- Initialize a given location's data
 function initPlaceData() 
@@ -264,8 +264,8 @@ while line do
   fields = rCharSplit(line,",")
   date = fields[1]
   place = fields[2] .. "," .. fields[3]
-  if not all[place] then all[place] = initPlaceData() end
-  here = all[place]
+  if not covidData[place] then covidData[place] = initPlaceData() end
+  here = covidData[place]
   here.county = fields[2]
   here.state = fields[3]
   here.pop = pop[place]
@@ -289,7 +289,7 @@ end
 state = {}
 USA = initPlaceData()
 stateByGov = {}
-for place, here in sPairs(all) do
+for place, here in sPairs(covidData) do
   if not state[here.state] then 
     state[here.state] = initPlaceData() 
     state[here.state]["countyList"] = {} 
@@ -348,19 +348,28 @@ for place, here in sPairs(all) do
   end
 end
 for state, here in sPairs(state) do
-   all[state] = here
-   all[state].pop = pop[state]
+   covidData[state] = here
+   covidData[state].pop = pop[state]
 end
-all["USA"] = USA
-all["USA"].pop = USpop
+covidData["USA"] = USA
+covidData["USA"].pop = USpop
 
 -- Add fields for red states and blue states
-all["redStates"] = stateByGov["red"]
-all["blueStates"] = stateByGov["blue"]
+covidData["redStates"] = stateByGov["red"]
+covidData["blueStates"] = stateByGov["blue"]
 
-maxCasesPer100k = processCOVIDtable(all, g_doDeaths)
+covidCases = tableCopyD(covidData)
+covidDeaths = tableCopyD(covidData)
+maxCasesPer100k = processCOVIDtable(covidCases, false)
+processCOVIDtable(covidDeaths, true)
 
-for place, here in sPairs(all) do
+if g_doDeaths then 
+  all = covidDeaths
+else
+  all = covidCases
+end
+
+for place, here in sPairs(covidCases) do
   for date, today in sPairs(here.date) do
     -- Estimate when we will have "Herd immunity".  Here, "Herd immunity"
     -- is how long, based on estimated doubling time, it would take
