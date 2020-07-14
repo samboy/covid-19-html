@@ -586,6 +586,7 @@ function makeAPage(place, here, growthByCounty, stateHTMLlist, dir, isDeath)
   -- GnuPlot, on the other hand, doesn't
   local fontnameSize = 'Caulixtla009Sans,12'
   local fname = string.gsub(place,"'","-")
+  local gname = fname -- Retain name without ' for GNUplot title
   if isDeath then
     fname = fname .. "-deaths"
   end
@@ -633,10 +634,10 @@ function makeAPage(place, here, growthByCounty, stateHTMLlist, dir, isDeath)
   local dtime = "doubling time"
   if isDeath then dtime = "deaths" end
   if here.mostRecentDate then
-    o:write("set title 'COVID-19 ' ..dtime.. ' for " .. fname ..
+    o:write("set title 'COVID-19 " ..dtime.. " for " .. gname ..
             " as of " .. here.mostRecentDate .. "'\n")
   else
-    o:write("set title 'COVID-19 " ..dtime.. " for " .. fname .. "'\n")
+    o:write("set title 'COVID-19 " ..dtime.. " for " .. gname .. "'\n")
   end
   o:write([=[set datafile separator ','
 set xdata time
@@ -845,7 +846,16 @@ if arg[1] == "gnuplot" or arg[1] == "website" then
     growthByCounty = makeAPage(place, here, growthByCounty, stateHTMLlist,
                                dir)
   end
- 
+
+  -- Create all of the web pages for mortality (death) statistics
+  for sName,_ in sPairs(state) do
+    if covidDeaths[sName] then
+      makeAPage(sName, covidDeaths[sName], {}, "", dir, true)
+    end
+  end
+  makeAPage("USA", covidDeaths["USA"], {}, stateDeathHTMLlist, dir, true)
+  makeAPage("redStates", covidDeaths["redStates"], {}, "", dir, true)
+  makeAPage("blueStates", covidDeaths["blueStates"], {}, "", dir, true)
   --------------------------------------------------------------------------
   -- Now that we have all of the per-state and per-county pages (as well
   -- as a top-level USA.html page), let's make an index which lets us
@@ -901,6 +911,9 @@ doubling time graphs</a>
 a whole, with the option to tap on per-state and per-county links.</a>
 ]=] )
   o:write("\n")
+  o:write("<h2>Per-state mortality statistics</h2>\n")
+  o:write('<a href="USA-deaths.html">Click here to get mortality (death)')
+  o:write("statistics for the US and for each state in the US</a>\n")
   o:write("<h2>States by political affiliation of governor</h2>\n")
   o:write("This is the number of total COVID-19 cases for states where the\n")
   o:write("governor has a given political affiliation.<p>\n")
