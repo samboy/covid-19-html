@@ -291,12 +291,15 @@ end
 --    on a given day (another accounting field for calculations)
 -- hadHalf: When we last saw 1/2 the cases (accounting field)
 -- last: Previous day's cases (or deaths) (accounting field)
--- date: This is the only field we need to look at once things
+-- date: This is the main field we need to look at once things
 --       are calculated.  This is a table where the keys are ISO dates
 --       (e.g. "2020-07-12" as a string); each element of the date
 --       table is a table which starts off with two values: "cases" and
 --       "deaths" (the total cumulative cases and deaths for a given day
 --       at a given place)
+-- state: This is the name of the state a given "county" place is in
+--       (e.g. for "San Diego,California", state is "California")
+--       places which are not counties will not have this field.
 -- Note that we will add a bunch more data to this table later, but this
 -- is how things start off.
 
@@ -412,10 +415,16 @@ processCOVIDtable(covidDeaths, true)
 --      incomplete)
 -- (place is a name like "San Diego,California" or "USA"; 2020-XX-XX is
 --  a date and we have all the above information for each day in our table)
--- The table "covidCases" is calculates all the above for cases; the table
+-- The table "covidCases" calculated all the above for cases; the table
 -- "covidDeaths" calculates all of the above for deaths.  Note that, for
 -- both tables place.date.2020-XX-XX.cases is always cases, and
 -- place.date.2020-XX-XX.deaths is always deaths.
+-- We also have a place.mostRecent, which is a pointer (more like "hard
+-- link", since Lua tables are always pointers) to the most
+-- recent place.date.2020-XX-XX table.  place.mostRecentDate is a
+-- string with the most recent "2020-XX-XX" date (yes, one *could*
+-- use place.date[place.mostRecentDate] to get at the most recent day,
+-- but mostRecent is a handy shortcut).
 
 if g_doDeaths then 
   all = covidDeaths
@@ -437,6 +446,14 @@ for place, here in sPairs(covidCases) do
 
   end
 end
+
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+-- At this point, we have built up the data tables.  We now can extract 
+-- that data to make CSV output, tabular output, hot spot analysis, or
+-- even an entire website to browse some of the data.
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
 
 -- Where are the hot spots
 heat = {}
