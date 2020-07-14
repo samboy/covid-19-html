@@ -506,7 +506,7 @@ end
 
 -------------------- make a map of a single datapoint --------------------
 
-function makeSVG(field)
+function makeSVG(covidDataTable, field)
   if not field then field = g_field end
   if not field then field = "averageGrowth" end
   local max = 0
@@ -518,9 +518,10 @@ function makeSVG(field)
   end
   -- Find "max" so we have 0 <-> 1 gradient
   for state, sAbbr in sPairs(stateNameAbbr) do
-    if all and all[state] and all[state]["mostRecent"] and 
-       all[state]["mostRecent"][field] then
-      local t = all[state]["mostRecent"][field]
+    if covidDataTable and covidDataTable[state] and 
+       covidDataTable[state]["mostRecent"] and 
+       covidDataTable[state]["mostRecent"][field] then
+      local t = covidDataTable[state]["mostRecent"][field]
       if doLog then t = math.log(t) / math.log(10) end -- Common log
       -- Only use states visible on map to determine red/green balance
       if sAbbr ~= "VI" and sAbbr ~= "MP" and sAbbr ~= "GU" and
@@ -533,9 +534,10 @@ function makeSVG(field)
   -- Make a string with a color for each state
   local repl = ""
   for state, sAbbr in sPairs(stateNameAbbr) do
-    if all and all[state] and all[state]["mostRecent"] and
-       all[state]["mostRecent"][field] then
-      local t = all[state]["mostRecent"][field]
+    if covidDataTable and covidDataTable[state] and 
+       covidDataTable[state]["mostRecent"] and
+       covidDataTable[state]["mostRecent"][field] then
+      local t = covidDataTable[state]["mostRecent"][field]
       if doLog then t = math.log(t) / math.log(10) end -- Common log
       local u 
       if t >= min and t <= max then u = (t - min) / (max - min) else t = -1 end
@@ -561,126 +563,100 @@ function makeSVG(field)
 end
 
 if arg[1] == "svg" then
-  print(makeSVG())
+  print(makeSVG(all))
   os.exit(0)
 end
 
--------------------- Make an entire website in GNUplot/ -------------------- 
-if arg[1] == "gnuplot" or arg[1] == "website" then
-  local dir = "GNUplot/"
+--------------------------------------------------------------------------
+-- This makes a single webpage for the website generator.  It generates
+-- 1. The CSV file gnuplot will read to make the PNG file
+-- 2. The .gnuplot file with GNUplot directions on how to make the PNG
+-- 3. The .html file which shows and describes the GNUplot PNG file 
+-- Input: place: Name of the place we make a webpage for
+-- (e.g. "San Diego,California" or "Florida")
+-- here: A pointer to the data in CovidCases for this datapoint
+-- growthByCounty: An updated tally of county growth
+-- Output: updated growthByCounty
+-- Side effects: A .gnuplot, .csv, and .html file are generated
+function makeAPage(place, here, growthByCounty, stateHTMLlist, dir)
+  -- Lua handles filenames with ' just fine.
+  -- GnuPlot, on the other hand, doesn't
   local fontnameSize = 'Caulixtla009Sans,12'
+  local fname = string.gsub(place,"'","-")
 
-  -----------------------------------------------------------------------
-  -- Let's get per-state growth summaries
-  local growthByState = {}
-  local stateHTMLlist = ""
-  local stateHotSpots = ""
-  for stateN,_ in sPairs(state) do
-    local growth = 0
-    if all[stateN] and 
-       all[stateN].mostRecent and 
-       all[stateN].mostRecent.averageGrowth then
-      growthByState[stateN] = all[stateN].mostRecent.averageGrowth
-      growth = growthByState[stateN]
-    end
-    local growFormat = string.format("%.2f",(growth - 1) * 100)
-    stateHTMLlist = stateHTMLlist .. 
-        '<a href="' .. stateN .. '.html">' .. stateN .. "</a>" ..
-        ' Growth rate: ' ..  growFormat .. "%<br>\n"
+  ------------------------------------------------------------------------
+  -- Make the CSV data file
+  local o = io.open(dir .. fname .. ".csv", "w")
+  if not o then 
+    print("Error opening " .. dir .. fname .. ".csv")
+    os.exit(1)
   end
-  local idx = 1
-  for stateN,growth in sPairs(growthByState, sortedByRevValue) do
-    if(idx <= 10) then
-      local growFormat = string.format("%.2f",(growth - 1) * 100)
-      stateHotSpots = stateHotSpots .. 
-        '<a href="' .. stateN .. '.html">' .. stateN .. "</a>" ..
-        ' Growth rate: ' ..  growFormat .. "%<br>\n"
+  o:write(makeHeaderString("csv"))
+  o:write("\n")
+  for date, data in sPairs(here.date) do
+    local calculatedDoublingTime = data.calculatedDoublingTime
+    if calculatedDoublingTime > data.cases then
+      calculatedDoublingTime = data.cases
     end
-    idx = idx + 1
-  end
-
-  local growthByCounty = {} 
-  -- Create all of the web pages so we can explore growth by state and 
-  -- county
-  for place, here in sPairs(all) do
-
-    -- Lua handles filenames with ' just fine.
-    -- GnuPlot, on the other hand, doesn't
-    fname = string.gsub(place,"'","-")
-
-    ------------------------------------------------------------------------
-    -- Make the CSV data file
-    local o = io.open(dir .. fname .. ".csv", "w")
-    if not o then 
-      print("Error opening " .. dir .. fname .. ".csv")
-      os.exit(1)
+    if calculatedDoublingTime > 100 then
+      calculatedDoublingTime = 100
     end
-    o:write(makeHeaderString("csv"))
+    local line = makeString("csv",
+                    date, data.cases, calculatedDoublingTime,
+                    data.actualDoublingDays, data.delta, 
+                    data.deltaAverage, data.casesPer100k or 0, 
+                    data.herdImmunityCalc or -1,
+                    data.averageGrowth)
+    o:write(line)
     o:write("\n")
-    for date, data in sPairs(here.date) do
-      local calculatedDoublingTime = data.calculatedDoublingTime
-      if calculatedDoublingTime > data.cases then
-        calculatedDoublingTime = data.cases
-      end
-      if calculatedDoublingTime > 100 then
-        calculatedDoublingTime = 100
-      end
-      local line = makeString("csv",
-                      date, data.cases, calculatedDoublingTime,
-                      data.actualDoublingDays, data.delta, 
-                      data.deltaAverage, data.casesPer100k or 0, 
-                      data.herdImmunityCalc or -1,
-                      data.averageGrowth)
-      o:write(line)
-      o:write("\n")
-    end
-    o:close()
-    print(dir .. fname .. ".csv written")
+  end
+  o:close()
+  print(dir .. fname .. ".csv written")
 
-    ------------------------------------------------------------------------
-    -- Make the file with GNUplot directions (which uses the CSV file)
-    o = io.open(dir .. fname .. ".gnuplot", "w")
-    if not o then 
-      print("Error opening " .. dir .. fname .. ".gnuplot")
-      os.exit(1)
-    end
-    o:write("set terminal pngcairo size 960,540 enhanced font '" ..
-             fontnameSize .. "'\n")
-    o:write("set output '" .. fname .. ".png'\n")
-    if here.mostRecentDate then
-      o:write("set title 'COVID-19 doubling time for " .. fname ..
-              " as of " .. here.mostRecentDate .. "'\n")
-    else
-      o:write("set title 'COVID-19 doubling time for " .. fname .. "'\n")
-    end
-    o:write([=[set datafile separator ','
+  ------------------------------------------------------------------------
+  -- Make the file with GNUplot directions (which uses the CSV file)
+  o = io.open(dir .. fname .. ".gnuplot", "w")
+  if not o then 
+    print("Error opening " .. dir .. fname .. ".gnuplot")
+    os.exit(1)
+  end
+  o:write("set terminal pngcairo size 960,540 enhanced font '" ..
+           fontnameSize .. "'\n")
+  o:write("set output '" .. fname .. ".png'\n")
+  if here.mostRecentDate then
+    o:write("set title 'COVID-19 doubling time for " .. fname ..
+            " as of " .. here.mostRecentDate .. "'\n")
+  else
+    o:write("set title 'COVID-19 doubling time for " .. fname .. "'\n")
+  end
+  o:write([=[set datafile separator ','
 set xdata time
 set timefmt "%Y-%m-%d"
 set key left autotitle columnhead
 set ylabel "Doubling Time"
 set xlabel "Date]=])
-    o:write("\n")
-    o:write([=[
+  o:write("\n")
+  o:write([=[
 plot "]=] .. fname .. 
 ".csv" .. '"' .. " using 1:2 with lines lw 4, '' using 1:3 with lines lw 4\n")
-    o:close()
+  o:close()
 
-    ------------------------------------------------------------------------
-    -- Make a simple HTML file with the graph
-    o = io.open(dir .. fname .. ".html", "w")
-    if not o then 
-      print("Error opening " .. dir .. fname .. ".html")
-      os.exit(1)
-    end
-    o:write("<html><head><title>COVID-19 doubling time for ")
-    o:write(place)
-    o:write("</title>\n")
-    -- UTF-8 header
-    o:write('<meta http-equiv="Content-Type" ')
-    o:write('content="text/html; charset=utf-8">' .. "\n")
-    -- Yes, I have made this page work on cell phone sized screens
-    -- Also: Basic styling
-    o:write([=[<meta name="viewport"
+  ------------------------------------------------------------------------
+  -- Make a simple HTML file with the graph
+  o = io.open(dir .. fname .. ".html", "w")
+  if not o then 
+    print("Error opening " .. dir .. fname .. ".html")
+    os.exit(1)
+  end
+  o:write("<html><head><title>COVID-19 doubling time for ")
+  o:write(place)
+  o:write("</title>\n")
+  -- UTF-8 header
+  o:write('<meta http-equiv="Content-Type" ')
+  o:write('content="text/html; charset=utf-8">' .. "\n")
+  -- Yes, I have made this page work on cell phone sized screens
+  -- Also: Basic styling
+  o:write([=[<meta name="viewport"
 content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0"
 >
 <style>
@@ -703,92 +679,134 @@ York Times</a> and the code to generate this page is open source and
 <a href=https://github.com/samboy/covid-19-html/>available on GitHub</a>.
 </i>
 ]=] )
-    o:write("<h1>" .. place .. "</h1>\n")
-    o:write('<a href="' .. fname .. '.png">')
-    o:write('<img src="' .. fname .. '.png" width=100%%></a><br>' .. "\n")
-    o:write("<i>This image shows doubling time for " .. place)
-    if here.mostRecentDate then
-      o:write(" as of " .. here.mostRecentDate)
-    end
-    o:write("</i>\n")
-    o:write("<p>\n")
-    if here.mostRecent and here.mostRecent.cases then
-      o:write("Cases: " .. tonumber(here.mostRecent.cases) .. "\n")
-    end 
-    if here.mostRecent and here.mostRecent.deltaAverage then
-      o:write("<br>New cases (7-day average): " .. 
-              string.format("%.2f",here.mostRecent.deltaAverage) .. "\n")
-    end
-    if here.mostRecent and here.mostRecent.averageGrowth then
-      o:write("<br>Growth: " .. 
-              string.format("%.2f",(here.mostRecent.averageGrowth - 1) * 100)..
-              "%\n")
-    end 
-    if here.mostRecent and here.mostRecent.calculatedDoublingTime then
-      if here.mostRecent.calculatedDoublingTime < 100 then
-        o:write("<br>Doubling days (calculated): " .. 
-                string.format("%.2f",here.mostRecent.calculatedDoublingTime) ..
-                "\n")
-      else
-        o:write("<br>Doubling days (calculated): > 100\n")
-      end
-    end 
-    if here.mostRecent and here.mostRecent.actualDoublingDays then
-      o:write("<br>Doubling days (actual): " .. 
-              string.format("%.2f",here.mostRecent.actualDoublingDays) ..
+  o:write("<h1>" .. place .. "</h1>\n")
+  o:write('<a href="' .. fname .. '.png">')
+  o:write('<img src="' .. fname .. '.png" width=100%%></a><br>' .. "\n")
+  o:write("<i>This image shows doubling time for " .. place)
+  if here.mostRecentDate then
+    o:write(" as of " .. here.mostRecentDate)
+  end
+  o:write("</i>\n")
+  o:write("<p>\n")
+  if here.mostRecent and here.mostRecent.cases then
+    o:write("Cases: " .. tonumber(here.mostRecent.cases) .. "\n")
+  end 
+  if here.mostRecent and here.mostRecent.deltaAverage then
+    o:write("<br>New cases (7-day average): " .. 
+            string.format("%.2f",here.mostRecent.deltaAverage) .. "\n")
+  end
+  if here.mostRecent and here.mostRecent.averageGrowth then
+    o:write("<br>Growth: " .. 
+            string.format("%.2f",(here.mostRecent.averageGrowth - 1) * 100)..
+            "%\n")
+  end 
+  if here.mostRecent and here.mostRecent.calculatedDoublingTime then
+    if here.mostRecent.calculatedDoublingTime < 100 then
+      o:write("<br>Doubling days (calculated): " .. 
+             string.format("%.2f",here.mostRecent.calculatedDoublingTime) ..
               "\n")
-    end 
-    o:write("<p>\n")
-    o:write([=[The above graph shows <i>doubling time</i>, i.e. the number
+    else
+      o:write("<br>Doubling days (calculated): > 100\n")
+    end
+  end 
+  if here.mostRecent and here.mostRecent.actualDoublingDays then
+    o:write("<br>Doubling days (actual): " .. 
+            string.format("%.2f",here.mostRecent.actualDoublingDays) ..
+            "\n")
+  end 
+  o:write("<p>\n")
+  o:write([=[The above graph shows <i>doubling time</i>, i.e. the number
 of days it takes for cases to double.  The purple line is <i>calculated</i>
 doubling time: The number of days, based on 7-day average growth, for
 cases to double.  The green line is <i>actual</i> doubling time: How
 many days ago did we have half the number of cases.  In both cases,
 the higher the line, the slower the COVID-19 growth.<p>]=])
-    if state[place] then
-      local countyList = {}
-      o:write("County list:<p>\n")
-      for _,county in ipairs(state[place]["countyList"]) do
-        if all[county] and 
-           all[county].mostRecent and 
-           all[county].mostRecent.averageGrowth then
-          countyList[county] = tonumber(all[county].mostRecent.averageGrowth)
-        else
-          countyList[county] = 0
-        end
+  if state[place] then
+    local countyList = {}
+    o:write("County list:<p>\n")
+    for _,county in ipairs(state[place]["countyList"]) do
+      if covidCases[county] and 
+         covidCases[county].mostRecent and 
+         covidCases[county].mostRecent.averageGrowth then
+        countyList[county] = 
+                        tonumber(covidCases[county].mostRecent.averageGrowth)
+      else
+        countyList[county] = 0
       end
-      for county,grow in sPairs(countyList) do
-        local growFormat = string.format("%.2f",(grow - 1) * 100)
-        local fCountyName = string.gsub(county,"'","-")
-        o:write('<a href="' .. fCountyName .. '.html">' .. county .. "</a>")
-        o:write(' Growth rate: ' ..  growFormat .. "%<br>\n")
-      end
-      o:write('<p><a href="USA.html">Return to USA</a> - ' .. "\n")
-      o:write('<a href="index.html">Return to top</a><br>' .. "\n")
-    elseif place == "USA" then
-      o:write([=[<i>It is possible to get per-state and per-county growth
+    end
+    for county,grow in sPairs(countyList) do
+      local growFormat = string.format("%.2f",(grow - 1) * 100)
+      local fCountyName = string.gsub(county,"'","-")
+      o:write('<a href="' .. fCountyName .. '.html">' .. county .. "</a>")
+      o:write(' Growth rate: ' ..  growFormat .. "%<br>\n")
+    end
+    o:write('<p><a href="USA.html">Return to USA</a> - ' .. "\n")
+    o:write('<a href="index.html">Return to top</a><br>' .. "\n")
+  elseif place == "USA" then
+    o:write([=[<i>It is possible to get per-state and per-county growth
 information.  Click on a state below to get growth information about that
 state.  Click on a county from the state page to get growth information
 about a single county</i><p>]=])
-      o:write("State list:<p>\n")
-      o:write(stateHTMLlist)
-      o:write('<p><a href="index.html">Return to top</a><br>' .. "\n")
-    else
-      if here.mostRecent and here.mostRecent.averageGrowth and
-         here.mostRecent.cases and here.mostRecent.cases > 1000 then
-        growthByCounty[place] = here.mostRecent.averageGrowth
-      end
-      o:write('<p>')
-      if here.state then
-        o:write('<a href="' .. here.state .. '.html">Return to ')
-        o:write(here.state .. "</a> - \n")
-      end
-      o:write('<a href="USA.html">Return to USA</a> - ' .. "\n")
-      o:write('<a href="index.html">Return to top</a><br>' .. "\n")
+    o:write("State list:<p>\n")
+    o:write(stateHTMLlist)
+    o:write('<p><a href="index.html">Return to top</a><br>' .. "\n")
+  else
+    if here.mostRecent and here.mostRecent.averageGrowth and
+       here.mostRecent.cases and here.mostRecent.cases > 1000 then
+      growthByCounty[place] = here.mostRecent.averageGrowth
     end
-    o:write("</div></body></html>\n")
-    o:close()
+    o:write('<p>')
+    if here.state then
+      o:write('<a href="' .. here.state .. '.html">Return to ')
+      o:write(here.state .. "</a> - \n")
+    end
+    o:write('<a href="USA.html">Return to USA</a> - ' .. "\n")
+    o:write('<a href="index.html">Return to top</a><br>' .. "\n")
+  end
+  o:write("</div></body></html>\n")
+  o:close()
+  return growthByCounty
+end
 
+-------------------- Make an entire website in GNUplot/ -------------------- 
+if arg[1] == "gnuplot" or arg[1] == "website" then
+
+  -----------------------------------------------------------------------
+  -- Let's get per-state growth summaries
+  local growthByState = {}
+  local stateHTMLlist = ""
+  local stateHotSpots = ""
+  local dir = "GNUplot/"
+  for stateN,_ in sPairs(state) do
+    local growth = 0
+    if covidCases[stateN] and 
+       covidCases[stateN].mostRecent and 
+       covidCases[stateN].mostRecent.averageGrowth then
+      growthByState[stateN] = covidCases[stateN].mostRecent.averageGrowth
+      growth = growthByState[stateN]
+    end
+    local growFormat = string.format("%.2f",(growth - 1) * 100)
+    stateHTMLlist = stateHTMLlist .. 
+        '<a href="' .. stateN .. '.html">' .. stateN .. "</a>" ..
+        ' Growth rate: ' ..  growFormat .. "%<br>\n"
+  end
+  local idx = 1
+  for stateN,growth in sPairs(growthByState, sortedByRevValue) do
+    if(idx <= 10) then
+      local growFormat = string.format("%.2f",(growth - 1) * 100)
+      stateHotSpots = stateHotSpots .. 
+        '<a href="' .. stateN .. '.html">' .. stateN .. "</a>" ..
+        ' Growth rate: ' ..  growFormat .. "%<br>\n"
+    end
+    idx = idx + 1
+  end
+
+  -- Create all of the web pages so we can explore growth by state and 
+  -- county
+  growthByCounty = {}
+  for place, here in sPairs(covidCases) do
+    growthByCounty = makeAPage(place, here, growthByCounty, stateHTMLlist,
+                               dir)
   end
  
   --------------------------------------------------------------------------
@@ -798,7 +816,7 @@ about a single county</i><p>]=])
 
   -- First, make a SVG file
   local o = io.open(dir .. "hotSpots.svg", "w")
-  o:write(makeSVG())
+  o:write(makeSVG(covidCases))
   o:close()
   
   local o = io.open(dir .. "index.html", "w")
