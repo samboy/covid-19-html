@@ -801,6 +801,9 @@ growth information about a single county]=])
   o:close()
   return growthByCounty
 end
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
 
 -------------------- Make an entire website in GNUplot/ -------------------- 
 if arg[1] == "gnuplot" or arg[1] == "website" then
@@ -808,12 +811,14 @@ if arg[1] == "gnuplot" or arg[1] == "website" then
   -----------------------------------------------------------------------
   -- Let's get per-state growth summaries
   local growthByState = {}
+  local dGrowthByState = {}
   local stateHTMLlist = ""
   local stateDeathHTMLlist = ""
   local stateHotSpots = ""
   local dir = "GNUplot/"
   for stateN,_ in sPairs(state) do
     local growth = 0
+    local dGrowth = 0
     if covidCases[stateN] and 
        covidCases[stateN].mostRecent and 
        covidCases[stateN].mostRecent.averageGrowth then
@@ -821,12 +826,19 @@ if arg[1] == "gnuplot" or arg[1] == "website" then
       growth = growthByState[stateN]
     end
     local growFormat = string.format("%.2f",(growth - 1) * 100)
+    if covidDeaths[stateN] and 
+       covidDeaths[stateN].mostRecent and 
+       covidDeaths[stateN].mostRecent.averageGrowth then
+      dGrowthByState[stateN] = covidDeaths[stateN].mostRecent.averageGrowth
+      dGrowth = dGrowthByState[stateN]
+    end
+    local dFormat = string.format("%.2f",(dGrowth - 1) * 100)
     stateHTMLlist = stateHTMLlist .. 
         '<a href="' .. stateN .. '.html">' .. stateN .. "</a>" ..
         ' Growth rate: ' ..  growFormat .. "%<br>\n"
     stateDeathHTMLlist = stateDeathHTMLlist .. 
         '<a href="' .. stateN .. '-deaths.html">' .. stateN .. "</a>" ..
-        ' Growth rate: ' ..  growFormat .. "%<br>\n"
+        ' Growth rate: ' ..  dFormat .. "%<br>\n"
   end
   local idx = 1
   for stateN,growth in sPairs(growthByState, sortedByRevValue) do
