@@ -766,10 +766,14 @@ In both cases, the higher the line, the slower the COVID-19 growth.<p>]=])
       o:write(' Growth rate: ' ..  growFormat .. "%<br>\n")
     end
     o:write('<p><a href="USA.html">Return to USA</a> - ' .. "\n")
-    o:write('<a href="index.html">Return to top</a><br>' .. "\n")
+    o:write('<a href="index.html">Return to top</a> - ' .. "\n")
+    o:write('<a href="' .. place .. '-deaths.html">Deaths for this state</a>')
+    o:write('<br>' .. "\n")
   elseif state[place] and isDeath then
     o:write('<p><a href="USA-deaths.html">Return to USA deaths</a> - ' .. "\n")
-    o:write('<a href="index.html">Return to top</a><br>' .. "\n")
+    o:write('<a href="index.html">Return to top</a> - ' .. "\n")
+    o:write('<a href="' .. place .. '.html">COVID-19 cases for this state</a>')
+    o:write('<br>' .. "\n")
   elseif place == "USA" then
     o:write([=[<i>It is possible to get per-state ]=])
     if not isDeath then o:write("and per-county ") end
