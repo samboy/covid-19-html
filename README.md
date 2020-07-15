@@ -48,6 +48,15 @@ cd GNUplot/
 gnuplot maps.gnuplot
 ```
 
+It’s also possible to make the .svg top-level map a .png file (for
+maximum browser compatibility) if `ImageMagick` is installed:
+
+```bash
+convert -depth 8 GNUplot/hotSpots.svg GNUplot/hotSpots.png
+cat GNUplot/index.html | sed 's/hotSpots.svg/hotSpots.png/g' > foo
+mv foo GNUplot/index.html
+```
+
 The Lua script makes the .html files and the files needed to make
 the PNG graphs.  Gnuplot makes the actual PNG files.
 
