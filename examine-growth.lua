@@ -1147,11 +1147,6 @@ means slow growth.
   else
     o:write("<p>\n")
   end
-  o:write("<h2>States by political affiliation of governor</h2>\n")
-  o:write("This is the number of total COVID-19 cases for states where the\n")
-  o:write("governor has a given political affiliation.<p>\n")
-  o:write("<a href=blueStates.html>Democrat governors</a><br>\n")
-  o:write("<a href=redStates.html>Republican governors</a>\n")
   o:write("<a name=Top10States> </a>\n")
   o:write("<h2>Top 10 states</h2>\n")
   o:write("This is a list of the 10 states with the most COVID-19 growth:\n")
@@ -1171,7 +1166,11 @@ means slow growth.
       iex = iex + 1
     end
   end 
-  o:write("<p>Note that some of these may be prison outbreaks.\n")
+  o:write("<h2>States by political affiliation</h2>\n")
+  o:write("This is the number of total COVID-19 cases for states where the\n")
+  o:write("governor has a given political affiliation.<p>\n")
+  o:write("<a href=blueStates.html>Democrat governors</a><br>\n")
+  o:write("<a href=redStates.html>Republican governors</a>\n")
   o:write([=[<h1>See also</h2>
 <a href=https://www.nytimes.com/interactive/2020/us/coronavirus-us-cases.html
 >NY Times interactive map showing per-county COVID-19 growth</a>]=])
