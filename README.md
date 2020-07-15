@@ -33,11 +33,7 @@ git clone https://github.com/nytimes/covid-19-data/
 cp covid-19-data/us-counties.csv data.csv
 lua examine-growth.lua gnuplot
 cd GNUplot/
-for FILE in *gnuplot ; do
-  gnuplot "$FILE"
-  echo "$FILE"
-done
-cp USA.html index.html
+gnuplot maps.gnuplot
 ```
 
 Once the New York Times repo is cloned:
@@ -49,11 +45,7 @@ cd ..
 cp covid-19-data/us-counties.csv data.csv
 lua examine-growth.lua gnuplot
 cd GNUplot/
-for FILE in *gnuplot ; do
-  gnuplot "$FILE"
-  echo "$FILE"
-done
-cp USA.html index.html
+gnuplot maps.gnuplot
 ```
 
 The Lua script makes the .html files and the files needed to make

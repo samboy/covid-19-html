@@ -702,6 +702,39 @@ function makeStatHTML(database, field, fieldHumanName, listSize, format)
   end
 end
 
+----------------------------------------------------------------------------
+-- Show a string with copyright information for the page
+function showCopyright()
+   return [=[
+The data for this graph comes from <a
+href=https://github.com/nytimes/covid-19-data/>The New York
+Times</a> and the code to generate this page is open source and <a
+href=https://github.com/samboy/covid-19-html/>available on GitHub</a>.
+]=] end
+
+----------------------------------------------------------------------------
+-- Show a string with CSS style information for the page
+function pageStyle()
+  return [=[
+<style>
+@media screen and (min-width: 641px) {
+        .page { width: 640px; margin-left: auto; margin-right: auto;
+                font-size: 18px; }
+}
+body { font-family: Helvetica Neue, Helvetica, Arial, sans-serif; }
+a {
+        color: #258723;
+	background: transparent;
+	text-decoration: none;
+}	
+a:hover {
+	text-decoration: underline;
+}
+h1 { font-weight: bold; }
+h2 { font-weight: bold; }
+</style>
+]=] end
+
 --------------------------------------------------------------------------
 -- This makes a single webpage for the website generator.  It generates
 -- 1. The CSV file gnuplot will read to make the PNG file
@@ -809,17 +842,8 @@ plot "]=] .. fname ..
   -- Also: Basic styling
   o:write([=[<meta name="viewport"
 content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0"
->
-<style>
-@import url('font/inline-fonts.css');
-@media screen and (min-width: 641px) {
-        .page { width: 640px; margin-left: auto; margin-right: auto;
-                font-size: 18px; }
-}
-body { font-family: Caulixtla, Serif; }
-h1 { font-weight: bold; }
-h2 { font-weight: bold; }
-</style>]=])
+>]=])
+    o:write(pageStyle())
     o:write([=[
 </head>
 <body>
@@ -829,12 +853,7 @@ h2 { font-weight: bold; }
   else
     o:write("<i>This is a graph showing COVID-19 growth. ")
   end
-  o:write([=[The data for this graph
-comes from <a href=https://github.com/nytimes/covid-19-data/>The New
-York Times</a> and the code to generate this page is open source and
-<a href=https://github.com/samboy/covid-19-html/>available on GitHub</a>.
-</i>
-]=] )
+  o:write("</i>\n")
   o:write("<h1>" .. place .. "</h1>\n")
   o:write('<a href="' .. fname .. '.png">')
   o:write('<img src="' .. fname .. '.png" width=100%%></a><br>' .. "\n")
@@ -944,6 +963,7 @@ growth information about a single county]=])
     o:write('<a href="USA.html">Return to USA</a> - ' .. "\n")
     o:write('<a href="index.html">Return to top</a><br>' .. "\n")
   end
+  o:write("<p><i>"..showCopyright().."</i>")
   o:write("</div></body></html>\n")
   o:close()
   return growthByCounty
@@ -1042,24 +1062,13 @@ if arg[1] == "gnuplot" or arg[1] == "website" then
   o:write([=[<meta name="viewport"
 content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0"
 >
-<style>
-@import url('font/inline-fonts.css');
-@media screen and (min-width: 641px) {
-        .page { width: 640px; margin-left: auto; margin-right: auto;
-                font-size: 18px; }
-}
-body { font-family: Caulixtla, Serif; }
-h1 { font-weight: bold; }
-h2 { font-weight: bold; }
-</style>
-</head>
+</head>]=])
+  o:write(pageStyle())
+  o:write([=[
 <body>
 <div class=page>
 <i>This is a map showing COVID-19 growth.  Red means fast growth; green 
-means slow growth.  The data for this graph
-comes from <a href=https://github.com/nytimes/covid-19-data/>The New
-York Times</a> and the code to generate this page is open source and
-<a href=https://github.com/samboy/covid-19-html/>available on GitHub</a>.
+means slow growth.
 </i>
 <p>
 <a href=USA.html>Also available: Overall, per state, and per county 
@@ -1107,6 +1116,8 @@ a whole, with the option to tap on per-state and per-county links.</a>
   o:write([=[<h1>See also</h2>
 <a href=https://www.nytimes.com/interactive/2020/us/coronavirus-us-cases.html
 >NY Times interactive map showing per-county COVID-19 growth</a>]=])
+  o:write("<h1>Where to get this data</h1>\n")
+  o:write(showCopyright())
   o:write("\n</div></body></html>\n")
 end
 
