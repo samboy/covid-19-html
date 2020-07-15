@@ -667,6 +667,7 @@ end
 
 --------------------------------------------------------------------------
 -- Correct place name so it can be a filename
+-- This removes quotes, accents, and other potential problems
 function filenameCorrect(name) 
   -- The reason why we don’t have accents in filenames is because Cygwin,
   -- when interfacing with native Windows programs, does conversions
@@ -735,6 +736,23 @@ h2 { font-weight: bold; }
 </style>
 ]=] end
 
+function buttonBarStyle() 
+  return [=[<style>
+.bb {background: black;color: white;border: 2px solid black;font-size: 22px;
+     padding: 4px; border-left: 2px solid black;border-right: 2px solid black;
+     margin-right: 0px;}
+.wb {background: white;color: black;border: 2px solid black;font-size: 22px;
+     padding: 4px; border-left: 0px;border-right: 2px solid black;}
+.wb a {color: black; padding: 4px; }
+</style>
+]=] end
+
+function buttonBar()
+  return "<span class=bb>Go to:</span>" ..
+         "<span class=wb><a href=USA.html>COVID-19 growth</a></span>" ..
+         "<span class=wb><a href=USA-deaths.html>Deaths</a></span>\n" ..
+         "<p>\n" 
+end
 --------------------------------------------------------------------------
 -- This makes a single webpage for the website generator.  It generates
 -- 1. The CSV file gnuplot will read to make the PNG file
@@ -1064,15 +1082,13 @@ content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0"
 >
 </head>]=])
   o:write(pageStyle())
+  o:write(buttonBarStyle())
+  o:write("<body>\n<div class=page>\n")
+  o:write(buttonBar())
   o:write([=[
-<body>
-<div class=page>
 <i>This is a map showing COVID-19 growth.  Red means fast growth; green 
 means slow growth.
 </i>
-<p>
-<a href=USA.html>Also available: Overall, per state, and per county 
-doubling time graphs</a>
 <p>
 <a href="hotSpots.svg"><img src="hotSpots.svg" width=100%></a><br>]=])
   if all.USA.mostRecentDate then
@@ -1080,14 +1096,6 @@ doubling time graphs</a>
   else
     o:write("<p>\n")
   end
-  o:write([=[
-<a href="USA.html">Click or tap here to view doubling time for the US as
-a whole, with the option to tap on per-state and per-county links.</a>
-]=] )
-  o:write("\n")
-  o:write("<h2>Per-state mortality statistics</h2>\n")
-  o:write('<a href="USA-deaths.html">Click here to get mortality (death)')
-  o:write("statistics for the US and for each state in the US</a>\n")
   o:write("<h2>States by political affiliation of governor</h2>\n")
   o:write("This is the number of total COVID-19 cases for states where the\n")
   o:write("governor has a given political affiliation.<p>\n")
