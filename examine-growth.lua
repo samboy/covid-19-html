@@ -639,6 +639,59 @@ if arg[1] == "svg" then
 end
 
 --------------------------------------------------------------------------
+-- This makes an array (table where the keys are 1,2,3,4,5,...) where
+-- the values are a stat for the table we are looking at.  This is 
+-- useful for "Top states for X" or "Top counties for X" lists
+-- Input: The Covid case database and field we want to look at
+-- Output: A sorter table
+function makeSortableStat(database, field)
+  local out = {}
+  for place, here in database do
+    if here.mostRecent and here.mostRecent[field] then
+      out[place] = here.mostRecent[field]
+    end
+  end
+  return out
+end
+
+--------------------------------------------------------------------------
+-- Correct place name so it can be a filename
+function filenameCorrect(name) 
+  -- The reason why we don’t have accents in filenames is because Cygwin,
+  -- when interfacing with native Windows programs, does conversions
+  -- between UTF-8 to and ISO 8859-1 charsets, so we need to avoid 
+  -- accents to not have issues (gnuplot handles accents just fine
+  -- as long as the locale is correctly set up)
+  local out = string.gsub(name,"'","-") -- ' is bad mojo in filenames
+  out = string.gsub(out,"ñ","ny") -- not "n" because of ¡Feliz ano nuevo!
+  out = string.gsub(out,"ö","o") -- Spelled "Coos" in CSV, but just in case
+  return out
+end
+
+--------------------------------------------------------------------------
+-- This makes a HTML list of the top N places for a given stat
+-- Input: database (to see if we want to look at case stat data or death
+-- stat data), Stat, what to call stat in list, size of list
+function makeStatHTML(database, field, fieldHumanName, listSize, format)
+  if not fieldHumanName then fieldHumanName = field end
+  if not listSize then listSize = 100 end
+  if not format then format = "%.2f" end
+  local iex = 0
+  local out = ""
+  statFieldTable = makeSortableStat(database, field)
+  for place, value in sPairs(statFieldTable, sortedByRevValue) do
+    local formatString = string.format(format,value)
+    out = out .. '<a href="' .. filenameCorrect(place) .. '.html">' 
+      .. place .. "</a>" .. ' ' .. fieldHumanName .. ': ' .. 
+      formatString .. "<br>\n"
+    iex = iex + 1
+    if(iex > listSize) then
+      return out
+    end
+  end
+end
+
+--------------------------------------------------------------------------
 -- This makes a single webpage for the website generator.  It generates
 -- 1. The CSV file gnuplot will read to make the PNG file
 -- 2. The .gnuplot file with GNUplot directions on how to make the PNG
@@ -657,16 +710,8 @@ function makeAPage(place, here, growthByCounty, stateHTMLlist, dir, isDeath,
   -- Lua handles filenames with ' just fine.
   -- GnuPlot, on the other hand, doesn't
   local fontnameSize = 'Caulixtla009Sans,12'
-  local fname = string.gsub(place,"'","-")
-  local gname = fname -- Retain name without ' for GNUplot title
-  -- Gnuplot can handle accents in titles, so this comes afterwards
-  -- (The reason why we don’t have accents in filenames is because Cygwin,
-  -- when interfacing with native Windows programs, does conversions
-  -- between UTF-8 to and ISO 8859-1 charsets, so we need to avoid 
-  -- accents to not have issues -- but gnuplot handles accents just fine
-  -- as long as the locale is correctly set up)
-  fname = string.gsub(fname,"ñ","ny") -- "ny" to avoid ¡Feliz ano nuevo!
-  fname = string.gsub(fname,"ö","o") -- Spelled "Coos" in CSV, but just in case
+  local gname = string.gsub(place,"'","-") -- Gnuplot title
+  local fname = filenameCorrect(place) -- filename for this location
   if isDeath then
     fname = fname .. "-deaths"
   end
@@ -842,9 +887,7 @@ In both cases, the higher the line, the slower the COVID-19 growth.<p>]=])
     end
     for county,grow in sPairs(countyList) do
       local growFormat = string.format("%.2f",(grow - 1) * 100)
-      local fCountyName = string.gsub(county,"'","-")
-      fCountyName = string.gsub(fCountyName,"ñ","ny") 
-      fCountyName = string.gsub(fCountyName,"ö","o") -- Spelled "Coos" in CSV
+      local fCountyName = filenameCorrect(county)
       o:write('<a href="' .. fCountyName .. '.html">' .. county .. "</a>")
       o:write(' Growth rate: ' ..  growFormat .. "%<br>\n")
     end
