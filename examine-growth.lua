@@ -576,8 +576,10 @@ if arg[1] == 'cases' or arg[1] == 'csv' then
 end
 
 -------------------- make a map of a single datapoint --------------------
+-- Input: The database we get data from, the name of the field we use
+-- to make the map, the maximum (red) value used on the map (optional)
 
-function makeSVG(covidDataTable, field)
+function makeSVG(covidDataTable, field, useMax, useMin)
   if not field then field = g_field end
   if not field then field = "averageGrowth" end
   local max = 0
@@ -588,19 +590,24 @@ function makeSVG(covidDataTable, field)
     field = "casesPer100k"
   end
   -- Find "max" so we have 0 <-> 1 gradient
-  for state, sAbbr in sPairs(stateNameAbbr) do
-    if covidDataTable and covidDataTable[state] and 
-       covidDataTable[state]["mostRecent"] and 
-       covidDataTable[state]["mostRecent"][field] then
-      local t = covidDataTable[state]["mostRecent"][field]
-      if doLog then t = math.log(t) / math.log(10) end -- Common log
-      -- Only use states visible on map to determine red/green balance
-      if sAbbr ~= "VI" and sAbbr ~= "MP" and sAbbr ~= "GU" and
-         sAbbr ~= "PR" then
-        if t > max then max = t end
-        if t < min then min = t end
+  if not useMax then
+    for state, sAbbr in sPairs(stateNameAbbr) do
+      if covidDataTable and covidDataTable[state] and 
+         covidDataTable[state]["mostRecent"] and 
+         covidDataTable[state]["mostRecent"][field] then
+        local t = covidDataTable[state]["mostRecent"][field]
+        if doLog then t = math.log(t) / math.log(10) end -- Common log
+        -- Only use states visible on map to determine red/green balance
+        if sAbbr ~= "VI" and sAbbr ~= "MP" and sAbbr ~= "GU" and
+           sAbbr ~= "PR" then
+          if t > max then max = t end
+          if t < min then min = t end
+        end
       end
     end
+  else
+    if not useMin then min = 0 else min = useMin end
+    max = useMax
   end
   -- Make a string with a color for each state
   local repl = ""
@@ -610,21 +617,25 @@ function makeSVG(covidDataTable, field)
        covidDataTable[state]["mostRecent"][field] then
       local t = covidDataTable[state]["mostRecent"][field]
       if doLog then t = math.log(t) / math.log(10) end -- Common log
-      local u 
-      if t >= min and t <= max then u = (t - min) / (max - min) else t = -1 end
-      if u and u >= 0 and u <= 1 then
-        if g_field == "calculatedDoublingTime" or 
-            g_field == "herdImmunityCalc" or
-            g_field == "actualDoublingDays" then
-          -- color = calcColor(0x80, 0x00, 0x00, 0x00, 0x80, 0x80, u)
-          color = calcColor(0xd2, 0x26, 0x32, 0x0b, 0xff, 0x20, u)
-        else
-          -- color = calcColor(0x00, 0x80, 0x80, 0x80, 0x00, 0x00, u)
-          color = calcColor(0x0b, 0xff, 0x20, 0xd2, 0x26, 0x32, u)
-        end
-        repl = repl .. "#" .. sAbbr .. "{fill: #" .. color .. ";}" ..
-               " <!-- " .. tostring(t) .. "-->\n"
+      local u
+      if t then
+        u = (tonumber(t) - min) / (max - min)
+      else
+        u = 0
+      end 
+      if u < 0 then u = 0 end
+      if u > 1 then u = 1 end
+      if g_field == "calculatedDoublingTime" or 
+          g_field == "herdImmunityCalc" or
+          g_field == "actualDoublingDays" then
+        -- color = calcColor(0x80, 0x00, 0x00, 0x00, 0x80, 0x80, u)
+        color = calcColor(0xd2, 0x26, 0x32, 0x0b, 0xff, 0x20, u)
+      else
+        -- color = calcColor(0x00, 0x80, 0x80, 0x80, 0x00, 0x00, u)
+        color = calcColor(0x0b, 0xff, 0x20, 0xd2, 0x26, 0x32, u)
       end
+      repl = repl .. "#" .. sAbbr .. "{fill: #" .. color .. ";}" ..
+             " <!-- " .. tostring(t) .. "-->\n"
     end
   end
   repl = repl .. "<!-- MIN: " .. tostring(min) .. ", MAX: " 
@@ -707,9 +718,9 @@ end
 -- Side effects: A .gnuplot, .csv, and .html file are generated
 function makeAPage(place, here, growthByCounty, stateHTMLlist, dir, isDeath,
 	gFileHandle)
+  local fontnameSize = 'Caulixtla009Sans,12'
   -- Lua handles filenames with ' just fine.
   -- GnuPlot, on the other hand, doesn't
-  local fontnameSize = 'Caulixtla009Sans,12'
   local gname = string.gsub(place,"'","-") -- Gnuplot title
   local fname = filenameCorrect(place) -- filename for this location
   if isDeath then
@@ -1017,7 +1028,7 @@ if arg[1] == "gnuplot" or arg[1] == "website" then
 
   -- First, make a SVG file
   local o = io.open(dir .. "hotSpots.svg", "w")
-  o:write(makeSVG(covidCases))
+  o:write(makeSVG(covidCases,"averageGrowth",1.04,1.00))
   o:close()
   
   local o = io.open(dir .. "index.html", "w")
