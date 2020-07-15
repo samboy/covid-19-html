@@ -751,7 +751,7 @@ h2 { font-weight: bold; }
 -- Side effects: A .gnuplot, .csv, and .html file are generated
 function makeAPage(place, here, growthByCounty, stateHTMLlist, dir, isDeath,
 	gFileHandle)
-  local fontnameSize = 'Caulixtla009Sans,12'
+  local fontnameSize = 'Arial,12'
   -- Lua handles filenames with ' just fine.
   -- GnuPlot, on the other hand, doesn't
   local gname = string.gsub(place,"'","-") -- Gnuplot title
