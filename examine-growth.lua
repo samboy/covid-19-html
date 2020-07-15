@@ -652,11 +652,14 @@ end
 -- isDeath: If true, we are looking at mortality stats
 -- Output: updated growthByCounty
 -- Side effects: A .gnuplot, .csv, and .html file are generated
-function makeAPage(place, here, growthByCounty, stateHTMLlist, dir, isDeath)
+function makeAPage(place, here, growthByCounty, stateHTMLlist, dir, isDeath,
+	gFileHandle)
   -- Lua handles filenames with ' just fine.
   -- GnuPlot, on the other hand, doesn't
   local fontnameSize = 'Caulixtla009Sans,12'
   local fname = string.gsub(place,"'","-")
+  local fname = string.gsub(fname,"ñ","ny") -- "ny" to avoid ¡Feliz ano nuevo!
+  local fname = string.gsub(fname,"ö","o") -- Spelled "Coos", but just in case
   local gname = fname -- Retain name without ' for GNUplot title
   if isDeath then
     fname = fname .. "-deaths"
@@ -694,33 +697,34 @@ function makeAPage(place, here, growthByCounty, stateHTMLlist, dir, isDeath)
 
   ------------------------------------------------------------------------
   -- Make the file with GNUplot directions (which uses the CSV file)
-  o = io.open(dir .. fname .. ".gnuplot", "w")
-  if not o then 
-    print("Error opening " .. dir .. fname .. ".gnuplot")
-    os.exit(1)
-  end
-  o:write("set terminal pngcairo size 960,540 enhanced font '" ..
+  -- o = io.open(dir .. fname .. ".gnuplot", "w")
+  -- if not o then 
+  --  print("Error opening " .. dir .. fname .. ".gnuplot")
+  --  os.exit(1)
+  -- end
+  gFileHandle:write("set terminal pngcairo size 960,540 enhanced font '" ..
            fontnameSize .. "'\n")
-  o:write("set output '" .. fname .. ".png'\n")
+  gFileHandle:write("set output '" .. fname .. ".png'\n")
   local dtime = "doubling time"
   if isDeath then dtime = "deaths" end
   if here.mostRecentDate then
-    o:write("set title 'COVID-19 " ..dtime.. " for " .. gname ..
+    gFileHandle:write("set title 'COVID-19 " ..dtime.. " for " .. gname ..
             " as of " .. here.mostRecentDate .. "'\n")
   else
-    o:write("set title 'COVID-19 " ..dtime.. " for " .. gname .. "'\n")
+    gFileHandle:write("set title 'COVID-19 " ..dtime.. " for " 
+                      .. gname .. "'\n")
   end
-  o:write([=[set datafile separator ','
+  gFileHandle:write([=[set datafile separator ','
 set xdata time
 set timefmt "%Y-%m-%d"
 set key left autotitle columnhead
 set ylabel "Doubling Time"
 set xlabel "Date]=])
-  o:write("\n")
-  o:write([=[
+  gFileHandle:write("\n")
+  gFileHandle:write([=[
 plot "]=] .. fname .. 
 ".csv" .. '"' .. " using 1:2 with lines lw 4, '' using 1:3 with lines lw 4\n")
-  o:close()
+  -- o:close()
 
   ------------------------------------------------------------------------
   -- Make a simple HTML file with the graph
@@ -886,6 +890,9 @@ end
 ----------------------------------------------------------------------------
 ----------------------------------------------------------------------------
 
+gFileHandle = io.open("GNUplot/maps.gnuplot","w")
+if not gFileHandle then print("Could not open .gnuplot file") os.exit(1) end
+
 -------------------- Make an entire website in GNUplot/ -------------------- 
 if arg[1] == "gnuplot" or arg[1] == "website" then
 
@@ -937,18 +944,21 @@ if arg[1] == "gnuplot" or arg[1] == "website" then
   growthByCounty = {}
   for place, here in sPairs(covidCases) do
     growthByCounty = makeAPage(place, here, growthByCounty, stateHTMLlist,
-                               dir)
+                               dir, false, gFileHandle)
   end
 
   -- Create all of the web pages for mortality (death) statistics
   for sName,_ in sPairs(state) do
     if covidDeaths[sName] then
-      makeAPage(sName, covidDeaths[sName], {}, "", dir, true)
+      makeAPage(sName, covidDeaths[sName], {}, "", dir, true, gFileHandle)
     end
   end
-  makeAPage("USA", covidDeaths["USA"], {}, stateDeathHTMLlist, dir, true)
-  makeAPage("redStates", covidDeaths["redStates"], {}, "", dir, true)
-  makeAPage("blueStates", covidDeaths["blueStates"], {}, "", dir, true)
+  makeAPage("USA", covidDeaths["USA"], {}, stateDeathHTMLlist, dir, true,
+    gFileHandle)
+  makeAPage("redStates", covidDeaths["redStates"], {}, "", dir, true,
+    gFileHandle)
+  makeAPage("blueStates", covidDeaths["blueStates"], {}, "", dir, true,
+    gFileHandle)
   --------------------------------------------------------------------------
   -- Now that we have all of the per-state and per-county pages (as well
   -- as a top-level USA.html page), let's make an index which lets us
