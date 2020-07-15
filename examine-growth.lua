@@ -658,8 +658,8 @@ function makeAPage(place, here, growthByCounty, stateHTMLlist, dir, isDeath,
   -- GnuPlot, on the other hand, doesn't
   local fontnameSize = 'Caulixtla009Sans,12'
   local fname = string.gsub(place,"'","-")
-  local fname = string.gsub(fname,"ñ","ny") -- "ny" to avoid ¡Feliz ano nuevo!
-  local fname = string.gsub(fname,"ö","o") -- Spelled "Coos", but just in case
+  fname = string.gsub(fname,"ñ","ny") -- "ny" to avoid ¡Feliz ano nuevo!
+  fname = string.gsub(fname,"ö","o") -- Spelled "Coos" in CSV, but just in case
   local gname = fname -- Retain name without ' for GNUplot title
   if isDeath then
     fname = fname .. "-deaths"
@@ -837,6 +837,8 @@ In both cases, the higher the line, the slower the COVID-19 growth.<p>]=])
     for county,grow in sPairs(countyList) do
       local growFormat = string.format("%.2f",(grow - 1) * 100)
       local fCountyName = string.gsub(county,"'","-")
+      fCountyName = string.gsub(fCountyName,"ñ","ny") 
+      fCountyName = string.gsub(fCountyName,"ö","o") -- Spelled "Coos" in CSV
       o:write('<a href="' .. fCountyName .. '.html">' .. county .. "</a>")
       o:write(' Growth rate: ' ..  growFormat .. "%<br>\n")
     end
