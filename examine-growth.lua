@@ -738,21 +738,54 @@ h2 { font-weight: bold; }
 
 function buttonBarStyle() 
   return [=[<style>
-.bb {background: black;color: white;border: 2px solid black;font-size: 22px;
+.bb {background: black;color: white;border: 2px solid black;font-size: 21px;
      padding: 4px; border-left: 2px solid black;border-right: 2px solid black;
      margin-right: 0px;}
-.wb {background: white;color: black;border: 2px solid black;font-size: 22px;
+.wb {background: white;color: black;border: 2px solid black;font-size: 21px;
      padding: 4px; border-left: 0px;border-right: 2px solid black;}
 .wb a {color: black; padding: 4px; }
 </style>
 ]=] end
 
-function buttonBar()
+function buttonBarToplevel()
   return "<span class=bb>Go to:</span>" ..
          "<span class=wb><a href=USA.html>COVID-19 growth</a></span>" ..
-         "<span class=wb><a href=USA-deaths.html>Deaths</a></span>\n" ..
+         "<span class=wb><a href=USA-deaths.html>Deaths</a></span>" ..
          "<p>\n" 
 end
+
+function buttonBarUSACases()
+  return "<span class=bb>Go to:</span>" ..
+         "<span class=wb><a href=USA.html#StateList>States</a></span>" ..
+         "<span class=wb><a href=USA-deaths.html>Deaths</a></span>" ..
+         "<span class=wb><a href=index.html>Top</a></span>" ..
+         "<p>\n" 
+end
+
+function buttonBarStateCases()
+  return "<span class=bb>Go to:</span>" ..
+         "<span class=wb><a href=#CountyList>Counties</a></span>" ..
+         "<span class=wb><a href=USA.html>USA</a></span>" ..
+         "<span class=wb><a href=index.html>Top</a></span>" ..
+         "<p>\n" 
+end
+
+function buttonBarStateDeaths()
+  return "<span class=bb>Go to:</span>" ..
+         "<span class=wb><a href=USA-deaths.html>USA</a></span>" ..
+         "<span class=wb><a href=USA.html>Cases</a></span>" ..
+         "<span class=wb><a href=index.html>Top</a></span>" ..
+         "<p>\n" 
+end
+
+function buttonBarUSADeaths()
+  return "<span class=bb>Go to:</span>" ..
+         "<span class=wb><a href=#StateList>States</a></span>" ..
+         "<span class=wb><a href=USA.html>Cases</a></span>" ..
+         "<span class=wb><a href=index.html>Top</a></span>" ..
+         "<p>\n" 
+end
+
 --------------------------------------------------------------------------
 -- This makes a single webpage for the website generator.  It generates
 -- 1. The CSV file gnuplot will read to make the PNG file
@@ -840,7 +873,7 @@ plot "]=] .. fname ..
   -- o:close()
 
   ------------------------------------------------------------------------
-  -- Make a simple HTML file with the graph
+  -- Make a HTML file with the graph
   o = io.open(dir .. fname .. ".html", "w")
   if not o then 
     print("Error opening " .. dir .. fname .. ".html")
@@ -862,10 +895,22 @@ plot "]=] .. fname ..
 content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0"
 >]=])
     o:write(pageStyle())
+    o:write(buttonBarStyle())
     o:write([=[
 </head>
 <body>
 <div class=page>]=])
+  if state[place] and not isDeath then
+    o:write(buttonBarStateCases())
+  elseif state[place] and isDeath then
+    o:write(buttonBarStateDeaths())
+  elseif place == "USA" and not isDeath then
+    o:write(buttonBarUSACases())
+  elseif place == "USA" and isDeath then
+    o:write(buttonBarUSADeaths())
+  else
+    o:write(buttonBarUSACases())
+  end
   if isDeath then 
     o:write("<i>This is a graph showing COVID-19 deaths. ")
   else
@@ -922,7 +967,8 @@ In both cases, the higher the line, the slower the COVID-19 growth.<p>]=])
 
   if state[place] and not isDeath then
     local countyList = {}
-    o:write("County list:<p>\n")
+    o:write("<a name=CountyList> </a>\n")
+    o:write("<h1>County list</h1>\n")
     for _,county in ipairs(state[place]["countyList"]) do
       if covidCases[county] and 
          covidCases[county].mostRecent and 
@@ -965,7 +1011,12 @@ state.]=])
 growth information about a single county]=])
     end
     o:write("</i><p>\n")
-    o:write("State list:<p>\n")
+    o:write("<a name=StateList> </a>\n")
+    if not isDeath then
+      o:write("<h1>State list (cases)</h1>\n")
+    else
+      o:write("<h1>State list (deaths)</h1>\n")
+    end
     o:write(stateHTMLlist)
     o:write('<p><a href="index.html">Return to top</a><br>' .. "\n")
   elseif not isDeath then
@@ -1084,7 +1135,7 @@ content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0"
   o:write(pageStyle())
   o:write(buttonBarStyle())
   o:write("<body>\n<div class=page>\n")
-  o:write(buttonBar())
+  o:write(buttonBarToplevel())
   o:write([=[
 <i>This is a map showing COVID-19 growth.  Red means fast growth; green 
 means slow growth.
