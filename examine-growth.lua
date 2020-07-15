@@ -658,9 +658,15 @@ function makeAPage(place, here, growthByCounty, stateHTMLlist, dir, isDeath,
   -- GnuPlot, on the other hand, doesn't
   local fontnameSize = 'Caulixtla009Sans,12'
   local fname = string.gsub(place,"'","-")
+  local gname = fname -- Retain name without ' for GNUplot title
+  -- Gnuplot can handle accents in titles, so this comes afterwards
+  -- (The reason why we don’t have accents in filenames is because Cygwin,
+  -- when interfacing with native Windows programs, does conversions
+  -- between UTF-8 to and ISO 8859-1 charsets, so we need to avoid 
+  -- accents to not have issues -- but gnuplot handles accents just fine
+  -- as long as the locale is correctly set up)
   fname = string.gsub(fname,"ñ","ny") -- "ny" to avoid ¡Feliz ano nuevo!
   fname = string.gsub(fname,"ö","o") -- Spelled "Coos" in CSV, but just in case
-  local gname = fname -- Retain name without ' for GNUplot title
   if isDeath then
     fname = fname .. "-deaths"
   end
