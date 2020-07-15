@@ -852,7 +852,7 @@ function makeAPage(place, here, growthByCounty, stateHTMLlist, dir, isDeath,
            fontnameSize .. "'\n")
   gFileHandle:write("set output '" .. fname .. ".png'\n")
   local dtime = "doubling time"
-  if isDeath then dtime = "deaths" end
+  if isDeath then dtime = "doubling time for deaths" end
   if here.mostRecentDate then
     gFileHandle:write("set title 'COVID-19 " ..dtime.. " for " .. gname ..
             " as of " .. here.mostRecentDate .. "'\n")
