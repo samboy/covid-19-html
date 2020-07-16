@@ -1238,6 +1238,7 @@ means slow growth.
   o:write("state by growth</title>")
   writePageHeader(o)
   o:write("<h1>States sorted by COVID-19 growth</h1>\n")
+  o:write("Figures are daily growth percentage (7-day average)<p>\n")
   o:write("<ol>\n")
   o:write(makeStatHTML(covidCases, "averageGrowth", "growth", 
           true, 55, "%.2f%%", true, "<li>"))
@@ -1285,6 +1286,7 @@ means slow growth.
   o:write("state by growth of deaths</title>")
   writePageHeader(o)
   o:write("<h1>States sorted by COVID-19 mortality growth</h1>\n")
+  o:write("Figures are daily increase percentage (7-day average)<p>\n")
   o:write("<ol>\n")
   o:write(makeStatHTML(covidDeaths, "averageGrowth", "growth", 
           true, 55, "%.2f%%", true, "<li>", "-deaths"))
