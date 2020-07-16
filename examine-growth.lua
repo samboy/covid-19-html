@@ -760,59 +760,61 @@ h2 { font-weight: bold; }
 
 function buttonBarStyle() 
   return [=[<style>
+#db {margin-top: 7px;}
 .bb {background: black;color: white;border: 2px solid black;font-size: 21px;
      padding: 4px; border-left: 2px solid black;border-right: 2px solid black;
-     margin-right: 0px;}
+     margin-right: 0px; }
 .wb {background: white;color: black;border: 2px solid black;font-size: 21px;
-     padding: 4px; border-left: 0px;border-right: 2px solid black;}
+     padding: 4px; border-left: 0px;border-right: 2px solid black; 
+     }
 .wb a {color: black; padding: 4px; }
 </style>
 ]=] end
 
 function buttonBarToplevel()
-  return "<span class=bb>Go to:</span>" ..
+  return "<div id=db><span class=bb>Go to:</span>" ..
          "<span class=wb><a href=USA.html>COVID-19 growth</a></span>" ..
          "<span class=wb><a href=USA-deaths.html>Deaths</a></span>" ..
-         "<p>\n" 
+         "</div><p>\n" 
 end
 
 function buttonBarSiteMap()
-  return "<span class=bb>Go to:</span>" ..
+  return "<div id=db><span class=bb>Go to:</span>" ..
          "<span class=wb><a href=index.html>Top</a></span>" ..
          "<span class=wb><a href=SiteMap.html>Site map</a></span>" ..
-         "<p>\n" 
+         "</div><p>\n" 
 end
 
 function buttonBarUSACases()
-  return "<span class=bb>Go to:</span>" ..
+  return "<div id=db><span class=bb>Go to:</span>" ..
          "<span class=wb><a href=USA.html#StateList>States</a></span>" ..
          "<span class=wb><a href=index.html>Top</a></span>" ..
          "<span class=wb><a href=SiteMap.html>Site map</a></span>" ..
-         "<p>\n" 
+         "</div><p>\n" 
 end
 
 function buttonBarStateCases()
-  return "<span class=bb>Go to:</span>" ..
+  return "<div id=db><span class=bb>Go to:</span>" ..
          "<span class=wb><a href=#CountyList>Counties</a></span>" ..
          "<span class=wb><a href=index.html>Top</a></span>" ..
          "<span class=wb><a href=SiteMap.html>Site map</a></span>" ..
-         "<p>\n" 
+         "</div><p>\n" 
 end
 
 function buttonBarStateDeaths()
-  return "<span class=bb>Go to:</span>" ..
+  return "<div id=db><span class=bb>Go to:</span>" ..
          "<span class=wb><a href=USA-deaths.html>USA</a></span>" ..
          "<span class=wb><a href=index.html>Top</a></span>" ..
          "<span class=wb><a href=SiteMap.html>Site map</a></span>" ..
-         "<p>\n" 
+         "</div><p>\n" 
 end
 
 function buttonBarUSADeaths()
-  return "<span class=bb>Go to:</span>" ..
+  return "<div id=db><span class=bb>Go to:</span>" ..
          "<span class=wb><a href=#StateList>States</a></span>" ..
          "<span class=wb><a href=index.html>Top</a></span>" ..
          "<span class=wb><a href=SiteMap.html>Site map</a></span>" ..
-         "<p>\n" 
+         "</div><p>\n" 
 end
 
 function writePageHeader(o, whichBar)
