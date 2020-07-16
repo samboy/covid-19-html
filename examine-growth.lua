@@ -730,6 +730,8 @@ The data comes from <a
 href=https://github.com/nytimes/covid-19-data/>The New York
 Times</a> and the code to generate these pages is open source and <a
 href=https://github.com/samboy/covid-19-html/>available on GitHub</a>.
+The number of actual COVID-19 cases and deaths are almost certainly higher
+than these figures.
 ]=] end
 
 ----------------------------------------------------------------------------
