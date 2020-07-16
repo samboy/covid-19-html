@@ -697,11 +697,12 @@ end
 -- - deaths
 -- - deltaAverage (7-day average increase in cases)
 function makeStatHTML(database, field, fieldHumanName, statesOnly,
-	listSize, format, isPercentage, itemPrefix)
+	listSize, format, isPercentage, itemPrefix, filePart)
   if not fieldHumanName then fieldHumanName = field end
   if not listSize then listSize = 100 end
   if not format then format = "%.2f" end
   if not itemPrefix then itemPrefix = "" end
+  if not filePart then filePart = "" end
   local iex = 0
   local out = ""
   statFieldTable = makeSortableStat(database, field, statesOnly)
@@ -710,7 +711,7 @@ function makeStatHTML(database, field, fieldHumanName, statesOnly,
     if isPercentage then tValue = (value - 1) * 100 end
     local formatString = string.format(format,tValue)
     out = out .. itemPrefix .. '<a href="' .. 
-      filenameCorrect(place) .. '.html">' ..
+      filenameCorrect(place) .. filePart .. '.html">' ..
       place .. "</a>" .. ' ' .. fieldHumanName .. ': ' .. 
       formatString .. "<br>\n"
     iex = iex + 1
@@ -802,6 +803,22 @@ function buttonBarUSADeaths()
          "<span class=wb><a href=USA.html>Cases</a></span>" ..
          "<span class=wb><a href=index.html>Top</a></span>" ..
          "<p>\n" 
+end
+
+function writePageHeader(o)
+  -- UTF-8 header
+  o:write('<meta http-equiv="Content-Type" ')
+  o:write('content="text/html; charset=utf-8">' .. "\n")
+
+  -- Yes, the page works on cell phones.  Also, styling.
+  o:write([=[<meta name="viewport"
+content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0"
+>
+</head>]=])
+  o:write(pageStyle())
+  o:write(buttonBarStyle())
+  o:write("<body>\n<div class=page>\n")
+  o:write(buttonBarUSACases())
 end
 
 --------------------------------------------------------------------------
@@ -1197,31 +1214,99 @@ means slow growth.
   o:write("\n</div></body></html>\n")
   o:close()
 
-
+  ------------------------------------------------------------------------
+  -- States sorted by growth 
   o = io.open(dir .. "statesByGrowth.html", "w")
   if not o then print("Error opening statesByGrowth.html") os.exit(1) end
-  o:write("<html><head><title>Sam Trenholme's COVID-19 tracker - state by growth</title>")
-
-  -- UTF-8 header
-  o:write('<meta http-equiv="Content-Type" ')
-  o:write('content="text/html; charset=utf-8">' .. "\n")
-
-  -- Yes, the page works on cell phones.  Also, styling.
-  o:write([=[<meta name="viewport"
-content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0"
->
-</head>]=])
-  o:write(pageStyle())
-  o:write(buttonBarStyle())
-  o:write("<body>\n<div class=page>\n")
-  o:write(buttonBarUSACases())
+  o:write("<html><head><title>Sam Trenholme's COVID-19 tracker - ")
+  o:write("state by growth</title>")
+  writePageHeader(o)
   o:write("<h1>States sorted by COVID-19 growth</h1>\n")
   o:write("<ol>\n")
   o:write(makeStatHTML(covidCases, "averageGrowth", "growth", 
           true, 55, "%.2f%%", true, "<li>"))
   o:write("</ol>\n")
+  o:write("<h1>See also</h1>\n")
+  o:write("States sorted by: ")
+  o:write("\n<a href=statesByCases100k.html>Cases per 100k</a>")
+  o:write("\n-\n")
+  o:write("\n<a href=statesByDeaths.html>Growth of deaths</a> - ")
+  o:write("<a href=statesByDeaths100k.html>Deaths per 100k</a>")
   o:write("\n<p><a href=index.html>Return to top</a>\n")
-  o:write("</div></body></html>\n")
+  o:write(showCopyright())
+  o:write("\n</div></body></html>\n")
   o:close()
+
+  ------------------------------------------------------------------------
+  -- States sorted by cases per capita
+  o = io.open(dir .. "statesByCases100k.html", "w")
+  if not o then print("Error opening statesByCases100k.html") os.exit(1) end
+  o:write("<html><head><title>Sam Trenholme's COVID-19 tracker - ")
+  o:write("state by cases per capita</title>")
+  writePageHeader(o)
+  o:write("<h1>States sorted by cases per 100k</h1>\n")
+  o:write("This is a list of COVID-19 cases per 100,000 people")
+  o:write("<ol>\n")
+  o:write(makeStatHTML(covidCases, "casesPer100k", "per capita", 
+          true, 55, "%.2f", false, "<li>"))
+  o:write("</ol>\n")
+  o:write("<h1>See also</h1>\n")
+  o:write("States sorted by: ")
+  o:write("\n<a href=statesByGrowth.html>Daily growth</a>")
+  o:write("\n-\n")
+  o:write("\n<a href=statesByDeaths.html>Growth of deaths</a> - ")
+  o:write("<a href=statesByDeaths100k.html>Deaths per 100k</a>")
+  o:write("\n<p><a href=index.html>Return to top</a>\n")
+  o:write(showCopyright())
+  o:write("\n</div></body></html>\n")
+  o:close()
+
+  ------------------------------------------------------------------------
+  -- States sorted by growth of deaths
+  o = io.open(dir .. "statesByDeaths.html", "w")
+  if not o then print("Error opening statesByDeaths.html") os.exit(1) end
+  o:write("<html><head><title>Sam Trenholme's COVID-19 tracker - ")
+  o:write("state by growth of deaths</title>")
+  writePageHeader(o)
+  o:write("<h1>States sorted by COVID-19 mortality growth</h1>\n")
+  o:write("<ol>\n")
+  o:write(makeStatHTML(covidDeaths, "averageGrowth", "growth", 
+          true, 55, "%.2f%%", true, "<li>", "-deaths"))
+  o:write("</ol>\n")
+  o:write("<h1>See also</h1>\n")
+  o:write("States sorted by: ")
+  o:write("\n<a href=statesByGrowth.html>Growth of cases</a> - ")
+  o:write("\n<a href=statesByCases100k.html>Cases per 100k</a>")
+  o:write("\n-\n")
+  o:write("<a href=statesByDeaths100k.html>Deaths per 100k</a>")
+  o:write("\n<p><a href=index.html>Return to top</a>\n")
+  o:write(showCopyright())
+  o:write("\n</div></body></html>\n")
+  o:close()
+
+  ------------------------------------------------------------------------
+  -- States sorted by deaths per capita
+  o = io.open(dir .. "statesByDeaths100k.html", "w")
+  if not o then print("Error opening statesByDeaths100k.html") os.exit(1) end
+  o:write("<html><head><title>Sam Trenholme's COVID-19 tracker - ")
+  o:write("state by deaths per capita</title>")
+  writePageHeader(o)
+  o:write("<h1>States sorted by deaths per 100k</h1>\n")
+  o:write("This is a list of COVID-19 deaths per 100,000 people")
+  o:write("<ol>\n")
+  o:write(makeStatHTML(covidDeaths, "casesPer100k", "per capita", 
+          true, 55, "%.2f", false, "<li>", "-deaths"))
+  o:write("</ol>\n")
+  o:write("<h1>See also</h1>\n")
+  o:write("States sorted by: ")
+  o:write("\n<a href=statesByGrowth.html>Daily growth</a>")
+  o:write("<a href=statesByCases100k.html>Cases per 100k</a>")
+  o:write("\n-\n")
+  o:write("\n<a href=statesByDeaths.html>Growth of deaths</a> - ")
+  o:write("\n<p><a href=index.html>Return to top</a>\n")
+  o:write(showCopyright())
+  o:write("\n</div></body></html>\n")
+  o:close()
+
 end
 
