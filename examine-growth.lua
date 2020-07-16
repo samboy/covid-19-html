@@ -653,13 +653,16 @@ end
 -- This makes an array (table where the keys are 1,2,3,4,5,...) where
 -- the values are a stat for the table we are looking at.  This is 
 -- useful for "Top states for X" or "Top counties for X" lists
--- Input: The Covid case database and field we want to look at
+-- Input: The Covid case database and field we want to look at;
+-- 	if statesOnly is set, we only make a state level list
 -- Output: A sorter table
-function makeSortableStat(database, field)
+function makeSortableStat(database, field, statesOnly)
   local out = {}
   for place, here in database do
-    if here.mostRecent and here.mostRecent[field] then
-      out[place] = here.mostRecent[field]
+    if (not statesOnly) or state[place] then
+      if here.mostRecent and here.mostRecent[field] then
+        out[place] = here.mostRecent[field]
+      end
     end
   end
   return out
@@ -683,14 +686,24 @@ end
 --------------------------------------------------------------------------
 -- This makes a HTML list of the top N places for a given stat
 -- Input: database (to see if we want to look at case stat data or death
--- stat data), Stat, what to call stat in list, size of list
-function makeStatHTML(database, field, fieldHumanName, listSize, format)
+-- stat data), Stat, what to call stat in list, statesOnly (only
+-- list states if true, size of list
+-- Example field names:
+-- - actualDoublingDays
+-- - calculatedDoublingTime
+-- - casesPer100k (not available everywhere)
+-- - averageGrowth
+-- - cases
+-- - deaths
+-- - deltaAverage (7-day average increase in cases)
+function makeStatHTML(database, field, fieldHumanName, statesOnly,
+	listSize, format)
   if not fieldHumanName then fieldHumanName = field end
   if not listSize then listSize = 100 end
   if not format then format = "%.2f" end
   local iex = 0
   local out = ""
-  statFieldTable = makeSortableStat(database, field)
+  statFieldTable = makeSortableStat(database, field, statesOnly)
   for place, value in sPairs(statFieldTable, sortedByRevValue) do
     local formatString = string.format(format,value)
     out = out .. '<a href="' .. filenameCorrect(place) .. '.html">' 
