@@ -773,6 +773,13 @@ function buttonBarToplevel()
          "<p>\n" 
 end
 
+function buttonBarSiteMap()
+  return "<span class=bb>Go to:</span>" ..
+         "<span class=wb><a href=SiteMap.html>Site map</a></span>" ..
+         "<span class=wb><a href=index.html>Top</a></span>" ..
+         "<p>\n" 
+end
+
 function buttonBarUSACases()
   return "<span class=bb>Go to:</span>" ..
          "<span class=wb><a href=USA.html#StateList>States</a></span>" ..
@@ -805,7 +812,8 @@ function buttonBarUSADeaths()
          "<p>\n" 
 end
 
-function writePageHeader(o)
+function writePageHeader(o, whichBar)
+  if not whichBar then whichBar = buttonBarSiteMap end
   -- UTF-8 header
   o:write('<meta http-equiv="Content-Type" ')
   o:write('content="text/html; charset=utf-8">' .. "\n")
@@ -818,7 +826,7 @@ content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0"
   o:write(pageStyle())
   o:write(buttonBarStyle())
   o:write("<body>\n<div class=page>\n")
-  o:write(buttonBarUSACases())
+  o:write(whichBar())
 end
 
 --------------------------------------------------------------------------
@@ -944,7 +952,7 @@ content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0"
   elseif place == "USA" and isDeath then
     o:write(buttonBarUSADeaths())
   else
-    o:write(buttonBarUSACases())
+    o:write(buttonBarSiteMap())
   end
   if isDeath then 
     o:write("<i>This is a graph showing COVID-19 deaths. ")
@@ -1304,6 +1312,49 @@ means slow growth.
   o:write("\n-\n")
   o:write("\n<a href=statesByDeaths.html>Growth of deaths</a> - ")
   o:write("\n<p><a href=index.html>Return to top</a>\n")
+  o:write(showCopyright())
+  o:write("\n</div></body></html>\n")
+  o:close()
+
+  --------------------------------------------------------------------------
+  -- Site map
+  o = io.open(dir .. "SiteMap.html", "w")
+  if not o then print("Error opening SiteMap.html") os.exit(1) end
+  o:write("<html><head><title>Sam Trenholme's COVID-19 tracker - ")
+  o:write("site map</title>")
+  writePageHeader(o, buttonBarToplevel)
+  o:write("<h1>Site map</h1>\n")
+  o:write("<a href=index.html>Index; heat map of the US</a><p>\n")
+  o:write("<a href=USA.html>Overall COVID-19 case growth information</a>")
+  o:write("<br>\n")
+  o:write("Case growth information by state: ")
+  for longName, abbr in sPairs(stateNameAbbr) do
+    o:write('<a href="' ..longName.. '.html">' ..abbr.. '</a> ')
+  end
+  o:write("<br><i>To get county-level information click on the state with ")
+  o:write("the desired county</i><p>")
+  o:write("<a href=USA-deaths.html>COVID-19 death growth information</a>")
+  o:write("<br>\n")
+  o:write("Case growth information by state: ")
+  for longName, abbr in sPairs(stateNameAbbr) do
+    o:write('<a href="' ..longName.. '-deaths.html">' ..abbr.. '</a> ')
+  end
+  o:write("<p>\n")
+  o:write("<a href=statesByGrowth.html>States by daily COVID-19 growth</a>")
+  o:write("<br>\n")
+  o:write("<a href=statesByCases100k.html>States by cases per 100,000</a>")
+  o:write("<br>\n")
+  o:write("<a href=statesByDeaths.html>States by daily COVID-19 mortality ")
+  o:write("growth</a>")
+  o:write("<br>\n")
+  o:write("<a href=statesByDeaths100k.html>States by deaths per 100,000</a>")
+  o:write("<p>\n")
+  o:write("<a href=redStates.html>COVID-19 daily growth for all states ")
+  o:write("with a Republican governor</a> (")
+  o:write("<a href=redStates-deaths.html>deaths</a>)<br>\n")
+  o:write("<a href=blueStates.html>COVID-19 daily growth for all states ")
+  o:write("with a Democrat governor</a> (")
+  o:write("<a href=blueStates-deaths.html>deaths</a>)<p>\n")
   o:write(showCopyright())
   o:write("\n</div></body></html>\n")
   o:close()
