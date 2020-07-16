@@ -1224,7 +1224,9 @@ means slow growth.
   o:write("<a href=redStates.html>Republican governors</a>\n")
   o:write([=[<h1>See also</h2>
 <a href=https://www.nytimes.com/interactive/2020/us/coronavirus-us-cases.html
->NY Times interactive map showing per-county COVID-19 growth</a>]=])
+>NY Times interactive map showing per-county COVID-19 growth</a><p>
+<a href=https://covid19risk.biosci.gatech.edu/>COVID-19 Event Risk
+Assessment Planning Tool</a>]=])
   o:write("<h1>Where to get this data</h1>\n")
   o:write(showCopyright())
   o:write("\n</div></body></html>\n")
