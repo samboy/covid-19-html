@@ -726,9 +726,9 @@ end
 -- Show a string with copyright information for the page
 function showCopyright()
    return [=[
-The data for this graph comes from <a
+The data comes from <a
 href=https://github.com/nytimes/covid-19-data/>The New York
-Times</a> and the code to generate this page is open source and <a
+Times</a> and the code to generate these pages is open source and <a
 href=https://github.com/samboy/covid-19-html/>available on GitHub</a>.
 ]=] end
 
@@ -741,7 +741,8 @@ function pageStyle()
         .page { width: 640px; margin-left: auto; margin-right: auto;
                 font-size: 18px; }
 }
-body { font-family: Helvetica Neue, Helvetica, Arial, sans-serif; }
+body { font-family: Helvetica Neue, Helvetica, Arial, sans-serif; 
+       overflow-y: scroll; }
 a {
         color: #258723;
 	background: transparent;
@@ -775,40 +776,40 @@ end
 
 function buttonBarSiteMap()
   return "<span class=bb>Go to:</span>" ..
-         "<span class=wb><a href=SiteMap.html>Site map</a></span>" ..
          "<span class=wb><a href=index.html>Top</a></span>" ..
+         "<span class=wb><a href=SiteMap.html>Site map</a></span>" ..
          "<p>\n" 
 end
 
 function buttonBarUSACases()
   return "<span class=bb>Go to:</span>" ..
          "<span class=wb><a href=USA.html#StateList>States</a></span>" ..
-         "<span class=wb><a href=USA-deaths.html>Deaths</a></span>" ..
          "<span class=wb><a href=index.html>Top</a></span>" ..
+         "<span class=wb><a href=SiteMap.html>Site map</a></span>" ..
          "<p>\n" 
 end
 
 function buttonBarStateCases()
   return "<span class=bb>Go to:</span>" ..
          "<span class=wb><a href=#CountyList>Counties</a></span>" ..
-         "<span class=wb><a href=USA.html>USA</a></span>" ..
          "<span class=wb><a href=index.html>Top</a></span>" ..
+         "<span class=wb><a href=SiteMap.html>Site map</a></span>" ..
          "<p>\n" 
 end
 
 function buttonBarStateDeaths()
   return "<span class=bb>Go to:</span>" ..
          "<span class=wb><a href=USA-deaths.html>USA</a></span>" ..
-         "<span class=wb><a href=USA.html>Cases</a></span>" ..
          "<span class=wb><a href=index.html>Top</a></span>" ..
+         "<span class=wb><a href=SiteMap.html>Site map</a></span>" ..
          "<p>\n" 
 end
 
 function buttonBarUSADeaths()
   return "<span class=bb>Go to:</span>" ..
          "<span class=wb><a href=#StateList>States</a></span>" ..
-         "<span class=wb><a href=USA.html>Cases</a></span>" ..
          "<span class=wb><a href=index.html>Top</a></span>" ..
+         "<span class=wb><a href=SiteMap.html>Site map</a></span>" ..
          "<p>\n" 
 end
 
@@ -1335,7 +1336,7 @@ means slow growth.
   o:write("the desired county</i><p>")
   o:write("<a href=USA-deaths.html>COVID-19 death growth information</a>")
   o:write("<br>\n")
-  o:write("Case growth information by state: ")
+  o:write("Mortality growth information by state: ")
   for longName, abbr in sPairs(stateNameAbbr) do
     o:write('<a href="' ..longName.. '-deaths.html">' ..abbr.. '</a> ')
   end
