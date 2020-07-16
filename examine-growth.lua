@@ -761,6 +761,7 @@ h2 { font-weight: bold; }
 function buttonBarStyle() 
   return [=[<style>
 #db {margin-top: 7px;}
+.x {display:none;}
 .bb {background: black;color: white;border: 2px solid black;font-size: 21px;
      padding: 4px; border-left: 2px solid black;border-right: 2px solid black;
      margin-right: 0px; }
@@ -773,46 +774,62 @@ function buttonBarStyle()
 
 function buttonBarToplevel()
   return "<div id=db><span class=bb>Go to:</span>" ..
+         "<span class=x> </span>" ..
          "<span class=wb><a href=USA.html>COVID-19 growth</a></span>" ..
+         "<span class=x> - </span>" ..
          "<span class=wb><a href=USA-deaths.html>Deaths</a></span>" ..
          "</div><p>\n" 
 end
 
 function buttonBarSiteMap()
   return "<div id=db><span class=bb>Go to:</span>" ..
+         "<span class=x> </span>" ..
          "<span class=wb><a href=index.html>Top</a></span>" ..
+         "<span class=x> - </span>" ..
          "<span class=wb><a href=SiteMap.html>Site map</a></span>" ..
          "</div><p>\n" 
 end
 
 function buttonBarUSACases()
   return "<div id=db><span class=bb>Go to:</span>" ..
+         "<span class=x> </span>" ..
          "<span class=wb><a href=USA.html#StateList>States</a></span>" ..
+         "<span class=x> - </span>" ..
          "<span class=wb><a href=index.html>Top</a></span>" ..
+         "<span class=x> - </span>" ..
          "<span class=wb><a href=SiteMap.html>Site map</a></span>" ..
          "</div><p>\n" 
 end
 
 function buttonBarStateCases()
   return "<div id=db><span class=bb>Go to:</span>" ..
+         "<span class=x> </span>" ..
          "<span class=wb><a href=#CountyList>Counties</a></span>" ..
+         "<span class=x> - </span>" ..
          "<span class=wb><a href=index.html>Top</a></span>" ..
+         "<span class=x> - </span>" ..
          "<span class=wb><a href=SiteMap.html>Site map</a></span>" ..
          "</div><p>\n" 
 end
 
 function buttonBarStateDeaths()
   return "<div id=db><span class=bb>Go to:</span>" ..
+         "<span class=x> </span>" ..
          "<span class=wb><a href=USA-deaths.html>USA</a></span>" ..
+         "<span class=x> - </span>" ..
          "<span class=wb><a href=index.html>Top</a></span>" ..
+         "<span class=x> - </span>" ..
          "<span class=wb><a href=SiteMap.html>Site map</a></span>" ..
          "</div><p>\n" 
 end
 
 function buttonBarUSADeaths()
   return "<div id=db><span class=bb>Go to:</span>" ..
+         "<span class=x> </span>" ..
          "<span class=wb><a href=#StateList>States</a></span>" ..
+         "<span class=x> - </span>" ..
          "<span class=wb><a href=index.html>Top</a></span>" ..
+         "<span class=x> - </span>" ..
          "<span class=wb><a href=SiteMap.html>Site map</a></span>" ..
          "</div><p>\n" 
 end
