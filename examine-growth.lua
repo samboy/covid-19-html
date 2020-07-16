@@ -980,6 +980,11 @@ content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0"
   if here.mostRecent and here.mostRecent.cases then
     o:write(caseStrU .. ": " .. tonumber(here.mostRecent.cases) .. "\n")
   end 
+  if here.mostRecent and here.mostRecent.casesPer100k then
+    o:write("<br>" .. caseStrU .. " Per 100,000: " .. 
+    string.format("%.2f",here.mostRecent.casesPer100k) 
+    .. "\n")
+  end
   if here.mostRecent and here.mostRecent.deltaAverage then
     o:write("<br>New " ..caseStrL.. " (7-day average): " .. 
             string.format("%.2f",here.mostRecent.deltaAverage) .. "\n")
