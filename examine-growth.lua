@@ -658,7 +658,7 @@ end
 -- Output: A sorter table
 function makeSortableStat(database, field, statesOnly)
   local out = {}
-  for place, here in database do
+  for place, here in sPairs(database) do
     if (not statesOnly) or state[place] then
       if here.mostRecent and here.mostRecent[field] then
         out[place] = here.mostRecent[field]
@@ -697,23 +697,28 @@ end
 -- - deaths
 -- - deltaAverage (7-day average increase in cases)
 function makeStatHTML(database, field, fieldHumanName, statesOnly,
-	listSize, format)
+	listSize, format, isPercentage, itemPrefix)
   if not fieldHumanName then fieldHumanName = field end
   if not listSize then listSize = 100 end
   if not format then format = "%.2f" end
+  if not itemPrefix then itemPrefix = "" end
   local iex = 0
   local out = ""
   statFieldTable = makeSortableStat(database, field, statesOnly)
   for place, value in sPairs(statFieldTable, sortedByRevValue) do
-    local formatString = string.format(format,value)
-    out = out .. '<a href="' .. filenameCorrect(place) .. '.html">' 
-      .. place .. "</a>" .. ' ' .. fieldHumanName .. ': ' .. 
+    local tValue = value
+    if isPercentage then tValue = (value - 1) * 100 end
+    local formatString = string.format(format,tValue)
+    out = out .. itemPrefix .. '<a href="' .. 
+      filenameCorrect(place) .. '.html">' ..
+      place .. "</a>" .. ' ' .. fieldHumanName .. ': ' .. 
       formatString .. "<br>\n"
     iex = iex + 1
     if(iex > listSize) then
       return out
     end
   end
+  return out
 end
 
 ----------------------------------------------------------------------------
@@ -1165,7 +1170,7 @@ means slow growth.
   o:write("This is a list of the 10 states with the most COVID-19 growth:\n")
   o:write("<p>\n") 
   o:write(stateHotSpots) 
-  o:write("\n") 
+  o:write("\n<p><a href=statesByGrowth.html>See more states...</a>\n")
   o:write("<a name=Top20Counties> </a>\n")
   o:write("<h2>Top 20 counties</h2>\n")
   o:write("This is a list of the 20 counties with the most COVID-19 growth:\n")
@@ -1190,5 +1195,33 @@ means slow growth.
   o:write("<h1>Where to get this data</h1>\n")
   o:write(showCopyright())
   o:write("\n</div></body></html>\n")
+  o:close()
+
+
+  o = io.open(dir .. "statesByGrowth.html", "w")
+  if not o then print("Error opening statesByGrowth.html") os.exit(1) end
+  o:write("<html><head><title>Sam Trenholme's COVID-19 tracker - state by growth</title>")
+
+  -- UTF-8 header
+  o:write('<meta http-equiv="Content-Type" ')
+  o:write('content="text/html; charset=utf-8">' .. "\n")
+
+  -- Yes, the page works on cell phones.  Also, styling.
+  o:write([=[<meta name="viewport"
+content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0"
+>
+</head>]=])
+  o:write(pageStyle())
+  o:write(buttonBarStyle())
+  o:write("<body>\n<div class=page>\n")
+  o:write(buttonBarUSACases())
+  o:write("<h1>States sorted by COVID-19 growth</h1>\n")
+  o:write("<ol>\n")
+  o:write(makeStatHTML(covidCases, "averageGrowth", "growth", 
+          true, 55, "%.2f%%", true, "<li>"))
+  o:write("</ol>\n")
+  o:write("\n<p><a href=index.html>Return to top</a>\n")
+  o:write("</div></body></html>\n")
+  o:close()
 end
 
