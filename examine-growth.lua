@@ -658,14 +658,18 @@ end
 -- Output: A sorter table
 function makeSortableStat(database, field, statesOnly)
   local out = {}
+  local lastDate = ""
   for place, here in sPairs(database) do
+    if here.mostRecentDate and here.mostRecentDate > lastDate then
+      lastDate = here.mostRecentDate
+    end
     if (not statesOnly) or state[place] then
       if here.mostRecent and here.mostRecent[field] then
         out[place] = here.mostRecent[field]
       end
     end
   end
-  return out
+  return out, lastDate
 end
 
 --------------------------------------------------------------------------
@@ -697,7 +701,7 @@ end
 -- - deaths
 -- - deltaAverage (7-day average increase in cases)
 function makeStatHTML(database, field, fieldHumanName, statesOnly,
-	listSize, format, isPercentage, itemPrefix, filePart)
+	listSize, format, isPercentage, itemPrefix, filePart, itemsEndStr)
   if not fieldHumanName then fieldHumanName = field end
   if not listSize then listSize = 100 end
   if not format then format = "%.2f" end
@@ -705,7 +709,8 @@ function makeStatHTML(database, field, fieldHumanName, statesOnly,
   if not filePart then filePart = "" end
   local iex = 0
   local out = ""
-  statFieldTable = makeSortableStat(database, field, statesOnly)
+  local lastDate = ""
+  statFieldTable, lastDate = makeSortableStat(database, field, statesOnly)
   for place, value in sPairs(statFieldTable, sortedByRevValue) do
     local tValue = value
     if isPercentage then tValue = (value - 1) * 100 end
@@ -718,6 +723,12 @@ function makeStatHTML(database, field, fieldHumanName, statesOnly,
     if(iex > listSize) then
       return out
     end
+  end
+  if itemsEndStr then
+    out = out .. itemsEndStr
+  end
+  if lastDate and lastDate ~= "" then
+    out = out .. "List current as of " .. lastDate
   end
   return out
 end
@@ -1264,8 +1275,7 @@ Assessment Planning Tool</a>]=])
   o:write("Figures are daily growth percentage (7-day average)<p>\n")
   o:write("<ol>\n")
   o:write(makeStatHTML(covidCases, "averageGrowth", "growth", 
-          true, 55, "%.2f%%", true, "<li>"))
-  o:write("</ol>\n")
+          true, 55, "%.2f%%", true, "<li>", "", "</ol>"))
   o:write("<h1>See also</h1>\n")
   o:write("States sorted by: ")
   o:write("\n<a href=statesByCases100k.html>Cases per 100k</a>")
@@ -1288,7 +1298,7 @@ Assessment Planning Tool</a>]=])
   o:write("This is a list of COVID-19 cases per 100,000 people")
   o:write("<ol>\n")
   o:write(makeStatHTML(covidCases, "casesPer100k", "per capita", 
-          true, 55, "%.2f", false, "<li>"))
+          true, 55, "%.2f", false, "<li>", "", "</ol>"))
   o:write("</ol>\n")
   o:write("<h1>See also</h1>\n")
   o:write("States sorted by: ")
@@ -1312,7 +1322,7 @@ Assessment Planning Tool</a>]=])
   o:write("Figures are daily increase percentage (7-day average)<p>\n")
   o:write("<ol>\n")
   o:write(makeStatHTML(covidDeaths, "averageGrowth", "growth", 
-          true, 55, "%.2f%%", true, "<li>", "-deaths"))
+          true, 55, "%.2f%%", true, "<li>", "-deaths", "</ol>"))
   o:write("</ol>\n")
   o:write("<h1>See also</h1>\n")
   o:write("States sorted by: ")
@@ -1336,7 +1346,7 @@ Assessment Planning Tool</a>]=])
   o:write("This is a list of COVID-19 deaths per 100,000 people")
   o:write("<ol>\n")
   o:write(makeStatHTML(covidDeaths, "casesPer100k", "per capita", 
-          true, 55, "%.2f", false, "<li>", "-deaths"))
+          true, 55, "%.2f", false, "<li>", "-deaths", "</ol>"))
   o:write("</ol>\n")
   o:write("<h1>See also</h1>\n")
   o:write("States sorted by: ")
