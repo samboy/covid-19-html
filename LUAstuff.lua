@@ -200,3 +200,29 @@ function calcColor(r1, g1, b1, r2, g2, b2, value)
   return string.format("%02x%02x%02x",r,g,b)
 end
 
+-- Make a large number look like a nice number with commas
+-- Input: The number, separator (make "." for European numbers)
+-- Output: A string with the number looking nice
+-- Example usage:
+-- foo = 1234567890 print(humanNumber(foo,",","%d"))
+function humanNumber(n, separator, fmt)
+  if not fmt then fmt = "%.2f" end
+  if not separator then separator = "," end -- I am in the US
+  if n < 0 then return "ERROR" end
+  local out = ""
+  local parts = {}
+  if n < 1000 then return string.format(fmt, n) end
+  low = n % 1000
+  n = math.floor(n / 1000)
+  while n > 0 do
+    if n > 0 then table.insert(parts, n % 1000) end
+    n = math.floor(n / 1000)
+  end
+  for i = #parts, 1, -1 do
+    if i == #parts then out = tostring(parts[i])
+    else out = out .. separator .. string.format("%03d",parts[i]) end
+  end
+  out = out .. separator .. string.format(fmt, low)
+  return out
+end
+
