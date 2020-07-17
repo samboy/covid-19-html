@@ -714,7 +714,7 @@ function makeStatHTML(database, field, fieldHumanName, statesOnly,
   for place, value in sPairs(statFieldTable, sortedByRevValue) do
     local tValue = value
     if isPercentage then tValue = (value - 1) * 100 end
-    local formatString = string.format(format,tValue)
+    local formatString = humanNumber(tValue,",",format)
     out = out .. itemPrefix .. '<a href="' .. 
       filenameCorrect(place) .. filePart .. '.html">' ..
       place .. "</a>" .. ' ' .. fieldHumanName .. ': ' .. 
@@ -1008,26 +1008,27 @@ content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0"
   if isDeath then caseStrL = "deaths" end
 
   if here.mostRecent and here.mostRecent.cases then
-    o:write(caseStrU .. ": " .. tonumber(here.mostRecent.cases) .. "\n")
+    o:write(caseStrU .. ": " .. 
+            humanNumber(here.mostRecent.cases,",","%d") .. "\n")
   end 
   if here.mostRecent and here.mostRecent.casesPer100k then
     o:write("<br>" .. caseStrU .. " Per 100,000: " .. 
-    string.format("%.2f",here.mostRecent.casesPer100k) 
+    humanNumber(here.mostRecent.casesPer100k) 
     .. "\n")
   end
   if here.mostRecent and here.mostRecent.deltaAverage then
     o:write("<br>New " ..caseStrL.. " (7-day average): " .. 
-            string.format("%.2f",here.mostRecent.deltaAverage) .. "\n")
+            humanNumber(here.mostRecent.deltaAverage) .. "\n")
   end
   if here.mostRecent and here.mostRecent.averageGrowth then
     o:write("<br>Growth: " .. 
-            string.format("%.2f",(here.mostRecent.averageGrowth - 1) * 100)..
+            humanNumber((here.mostRecent.averageGrowth - 1) * 100) ..
             "%\n")
   end 
   if here.mostRecent and here.mostRecent.calculatedDoublingTime then
     if here.mostRecent.calculatedDoublingTime < 100 then
       o:write("<br>Doubling days (calculated): " .. 
-             string.format("%.2f",here.mostRecent.calculatedDoublingTime) ..
+             humanNumber(here.mostRecent.calculatedDoublingTime) ..
               "\n")
     else
       o:write("<br>Doubling days (calculated): > 100\n")
@@ -1035,7 +1036,7 @@ content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0"
   end 
   if here.mostRecent and here.mostRecent.actualDoublingDays then
     o:write("<br>Doubling days (actual): " .. 
-            string.format("%.2f",here.mostRecent.actualDoublingDays) ..
+            humanNumber(here.mostRecent.actualDoublingDays) ..
             "\n")
   end 
   o:write("<p>\n")
@@ -1061,7 +1062,7 @@ In both cases, the higher the line, the slower the COVID-19 growth.<p>]=])
       end
     end
     for county,grow in sPairs(countyList) do
-      local growFormat = string.format("%.2f",(grow - 1) * 100)
+      local growFormat = humanNumber((grow - 1) * 100)
       local fCountyName = filenameCorrect(county)
       o:write('<a href="' .. fCountyName .. '.html">' .. county .. "</a>")
       o:write(' Growth rate: ' ..  growFormat .. "%<br>\n")
@@ -1145,14 +1146,14 @@ if arg[1] == "gnuplot" or arg[1] == "website" then
       growthByState[stateN] = covidCases[stateN].mostRecent.averageGrowth
       growth = growthByState[stateN]
     end
-    local growFormat = string.format("%.2f",(growth - 1) * 100)
+    local growFormat = humanNumber((growth - 1) * 100)
     if covidDeaths[stateN] and 
        covidDeaths[stateN].mostRecent and 
        covidDeaths[stateN].mostRecent.averageGrowth then
       dGrowthByState[stateN] = covidDeaths[stateN].mostRecent.averageGrowth
       dGrowth = dGrowthByState[stateN]
     end
-    local dFormat = string.format("%.2f",(dGrowth - 1) * 100)
+    local dFormat = humanNumber((dGrowth - 1) * 100)
     stateHTMLlist = stateHTMLlist .. 
         '<a href="' .. stateN .. '.html">' .. stateN .. "</a>" ..
         ' Growth rate: ' ..  growFormat .. "%<br>\n"
@@ -1163,7 +1164,7 @@ if arg[1] == "gnuplot" or arg[1] == "website" then
   local idx = 1
   for stateN,growth in sPairs(growthByState, sortedByRevValue) do
     if(idx <= 10) then
-      local growFormat = string.format("%.2f",(growth - 1) * 100)
+      local growFormat = humanNumber((growth - 1) * 100)
       stateHotSpots = stateHotSpots .. 
         '<a href="' .. stateN .. '.html">' .. stateN .. "</a>" ..
         ' Growth rate: ' ..  growFormat .. "%<br>\n"
@@ -1217,9 +1218,16 @@ content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0"
   o:write(buttonBarStyle())
   o:write("<body>\n<div class=page>\n")
   o:write(buttonBarToplevel())
+  o:write("<h1>COVID-19 in the USA</h1>\n")
+  o:write("\nCases: " ..
+    humanNumber(covidCases.USA.mostRecent.cases, ",", "%d") .. " (" ..
+    humanNumber(covidCases.USA.mostRecent.casesPer100k) .. " per 100,000)<br>")
+  o:write("\nDeaths: " ..
+    humanNumber(covidDeaths.USA.mostRecent.deaths, ",", "%d") .. " (" ..
+    humanNumber(covidDeaths.USA.mostRecent.casesPer100k) .. " per 100,000)<p>")
   o:write([=[
-<i>This is a map showing COVID-19 growth.  Red means fast growth; green 
-means slow growth.
+<i>This is a map showing COVID-19 growth.  Red means fast (5% or higer)
+growth; green means slow growth.
 </i>
 <p>
 <a href="hotSpots.svg"><img src="hotSpots.svg" width=100%></a><br>]=])
@@ -1241,7 +1249,7 @@ means slow growth.
   local iex = 1
   for countyN, growth in sPairs(growthByCounty, sortedByRevValue) do
     if(iex < 20) and not string.match(countyN,'Unknown') then
-      local growFormat = string.format("%.2f",(growth - 1) * 100)
+      local growFormat = humanNumber((growth - 1) * 100)
       o:write('<a href="' .. countyN .. '.html">' .. countyN .. "</a>" ..
         ' Growth rate: ' ..  growFormat .. "%<br>\n")
       iex = iex + 1
