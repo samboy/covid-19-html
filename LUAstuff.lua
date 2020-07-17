@@ -222,9 +222,10 @@ function humanNumber(n, separator, fmt)
     if i == #parts then out = tostring(parts[i])
     else out = out .. separator .. string.format("%03d",parts[i]) end
   end
-  if(low > 100) then out = out .. "0" end
-  if(low > 10) then out = out .. "0" end
-  out = out .. separator .. string.format(fmt, low)
+  out = out .. separator
+  if(low < 100) then out = out .. "0" end
+  if(low < 10) then out = out .. "0" end
+  out = out .. string.format(fmt, low)
   return out
 end
 
