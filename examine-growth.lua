@@ -1255,10 +1255,15 @@ means slow growth.
   o:write("<h1>Site map</h1>\n") 
   o:write("<a href=SiteMap.html>A site map is available</a>\n")
   o:write([=[<h1>See also</h1>
-<a href=https://www.nytimes.com/interactive/2020/us/coronavirus-us-cases.html
->NY Times interactive map showing per-county COVID-19 growth</a><p>
-<a href=https://covid19risk.biosci.gatech.edu/>COVID-19 Event Risk
-Assessment Planning Tool</a>]=])
+<ul>
+<li><a href=https://www.nytimes.com/interactive/2020/us/coronavirus-us-cases.html
+>NY Times interactive map showing per-county COVID-19 growth</a><br>
+<li><a href=https://coronavirus.jhu.edu/us-map>John Hopkins Coronavirus Resource Center</a><br>
+<li><a href=https://www.worldometers.info/coronavirus/>WorldOmeter COVID-19 Coronavirus Pandemic information page</a>
+<li><a href=https://coronavirus.1point3acres.com/en>1Point3Acres COVID-19 Tracker</a>
+<li><a href=https://covid19risk.biosci.gatech.edu/>COVID-19 Event Risk
+Assessment Planning Tool</a>
+</ul>]=])
   o:write("<h1>Where to get this data</h1>\n")
   o:write(showCopyright())
   o:write("\n</div></body></html>\n")
