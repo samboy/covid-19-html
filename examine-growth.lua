@@ -715,13 +715,15 @@ function makeStatHTML(database, field, fieldHumanName, statesOnly,
     local tValue = value
     if isPercentage then tValue = (value - 1) * 100 end
     local formatString = humanNumber(tValue,",",format)
-    out = out .. itemPrefix .. '<a href="' .. 
-      filenameCorrect(place) .. filePart .. '.html">' ..
-      place .. "</a>" .. ' ' .. fieldHumanName .. ': ' .. 
-      formatString .. "<br>\n"
-    iex = iex + 1
-    if(iex > listSize) then
-      return out
+    if not string.match(place, 'Unknown') then
+      out = out .. itemPrefix .. '<a href="' .. 
+        filenameCorrect(place) .. filePart .. '.html">' ..
+        place .. "</a>" .. ' ' .. fieldHumanName .. ': ' .. 
+        formatString .. "<br>\n"
+      iex = iex + 1
+      if(iex > listSize) then
+        return out
+      end
     end
   end
   if itemsEndStr then
@@ -1127,7 +1129,7 @@ gFileHandle = io.open("GNUplot/maps.gnuplot","w")
 if not gFileHandle then print("Could not open .gnuplot file") os.exit(1) end
 
 -------------------- Make an entire website in GNUplot/ -------------------- 
-if arg[1] == "gnuplot" or arg[1] == "website" then
+if arg[1] == "gnuplot" or arg[1] == "website" or arg[1] == "webquick" then
 
   -----------------------------------------------------------------------
   -- Let's get per-state growth summaries
@@ -1175,9 +1177,11 @@ if arg[1] == "gnuplot" or arg[1] == "website" then
   -- Create all of the web pages so we can explore growth by state and 
   -- county
   growthByCounty = {}
-  for place, here in sPairs(covidCases) do
-    growthByCounty = makeAPage(place, here, growthByCounty, stateHTMLlist,
-                               dir, false, gFileHandle)
+  if arg[1] ~= "webquick" then
+    for place, here in sPairs(covidCases) do
+      growthByCounty = makeAPage(place, here, growthByCounty, stateHTMLlist,
+                                 dir, false, gFileHandle)
+    end
   end
 
   -- Create all of the web pages for mortality (death) statistics
@@ -1255,6 +1259,7 @@ growth; green means slow growth.
       iex = iex + 1
     end
   end 
+  o:write("\n<p><a href=countyByGrowth.html>See more counties...</a>\n")
   o:write("<h2>States by political affiliation</h2>\n")
   o:write("This is the number of total COVID-19 cases for states where the\n")
   o:write("governor has a given political affiliation.<p>\n")
@@ -1368,6 +1373,30 @@ Assessment Planning Tool</a>
   o:write("\n-\n")
   o:write("\n<a href=statesByDeaths.html>Growth of deaths</a>")
   o:write("\n<p><a href=index.html>Return to top</a><p>\n")
+  o:write(showCopyright())
+  o:write("\n</div></body></html>\n")
+  o:close()
+
+  ------------------------------------------------------------------------
+  -- Counties sorted by growth 
+  o = io.open(dir .. "countyByGrowth.html", "w")
+  if not o then print("Error opening countyByGrowth.html") os.exit(1) end
+  o:write("<html><head><title>Sam Trenholme's COVID-19 tracker - ")
+  o:write("counties by growth</title>")
+  writePageHeader(o)
+  o:write("<h1>Counties sorted by COVID-19 growth</h1>\n")
+  o:write("Figures are daily growth percentage (7-day average)<p>\n")
+  o:write("<ol>\n")
+  local iey = 1
+  for countyN, growth in sPairs(growthByCounty, sortedByRevValue) do
+    if(iey <= 100) and not string.match(countyN,'Unknown') then
+      local growFormat = humanNumber((growth - 1) * 100)
+      o:write('<li><a href="' .. countyN .. '.html">' .. countyN .. "</a>" ..
+        ' Growth rate: ' ..  growFormat .. "%<br>\n")
+      iey = iey + 1
+    end
+  end 
+  o:write("\n</ol><p><a href=index.html>Return to top</a><p>\n")
   o:write(showCopyright())
   o:write("\n</div></body></html>\n")
   o:close()
