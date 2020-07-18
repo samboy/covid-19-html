@@ -6,6 +6,12 @@ require("governors")
 require("USmap")
 
 ---------------------------------------------------------------------------
+-- Human name for county,state
+function humanCounty(i)
+  return string.gsub(i,",",", ")
+end
+
+---------------------------------------------------------------------------
 -- Process the totals we have to get growth rates and other calculated data 
 -- Input: A table which has a lot of data about COVID-19 cases and
 -- deaths; useDeaths, a boolean, that, if true, means we process deaths,
@@ -976,7 +982,7 @@ plot "]=] .. fname ..
   else
     o:write("<html><head><title>COVID-19 doubling time for ")
   end
-  o:write(place)
+  o:write(humanCounty(place))
   o:write("</title>\n")
   -- UTF-8 header
   o:write('<meta http-equiv="Content-Type" ')
@@ -1009,10 +1015,10 @@ content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0"
     o:write("<i>This is a graph showing COVID-19 growth. ")
   end
   o:write("</i>\n")
-  o:write("<h1>" .. place .. "</h1>\n")
+  o:write("<h1>" .. humanCounty(place) .. "</h1>\n")
   o:write('<a href="' .. fname .. '.png">')
   o:write('<img src="' .. fname .. '.png" width=100%%></a><br>' .. "\n")
-  o:write("<i>This image shows " ..dtime.. " for " .. place)
+  o:write("<i>This image shows " ..dtime.. " for " .. humanCounty(place))
   if here.mostRecentDate then
     o:write(" as of " .. here.mostRecentDate)
   end
@@ -1085,7 +1091,8 @@ In both cases, the higher the line, the slower the COVID-19 growth.<p>]=])
     for county,grow in sPairs(countyList) do
       local growFormat = humanNumber((grow - 1) * 100)
       local fCountyName = filenameCorrect(county)
-      o:write('<a href="' .. fCountyName .. '.html">' .. county .. "</a>")
+      o:write('<a href="' .. fCountyName .. '.html">' .. humanCounty(county)
+               .. "</a>")
       o:write(' Growth rate: ' ..  growFormat .. "%<br>\n")
     end
     o:write('<p><a href="USA.html">Return to USA</a> - ' .. "\n")
@@ -1273,7 +1280,8 @@ growth; green means slow growth.
   for countyN, growth in sPairs(growthByCounty, sortedByRevValue) do
     if(iex < 20) and not string.match(countyN,'Unknown') then
       local growFormat = humanNumber((growth - 1) * 100)
-      o:write('<a href="' .. countyN .. '.html">' .. countyN .. "</a>" ..
+      o:write('<a href="' .. countyN .. '.html">' .. humanCounty(countyN)
+         .. "</a>" ..
         ' Growth rate: ' ..  growFormat .. "%<br>\n")
       iex = iex + 1
     end
@@ -1410,7 +1418,8 @@ Assessment Planning Tool</a>
   for countyN, growth in sPairs(growthByCounty, sortedByRevValue) do
     if(iey <= 100) and not string.match(countyN,'Unknown') then
       local growFormat = humanNumber((growth - 1) * 100)
-      o:write('<li><a href="' .. countyN .. '.html">' .. countyN .. "</a>" ..
+      o:write('<li><a href="' .. countyN .. '.html">' .. 
+        humanCounty(countyN) .. "</a>" ..
         ' Growth rate: ' ..  growFormat .. "%<br>\n")
       iey = iey + 1
     end
