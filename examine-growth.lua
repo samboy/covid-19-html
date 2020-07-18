@@ -540,7 +540,7 @@ function makeString(outputFormat,
     return string.format("%s,%f,%d,%d,%.2f,%.2f,%.2f,%.2f",date, 
       calculatedDoublingTime,
       actualDoublingDays, cases, casesPer100k, herdImmunityCalc,
-      (averageGrowth - 1) * 100, delta14capita)
+      (averageGrowth - 1) * 100, delta14capita or -1)
   else
     return string.format("%s %8d %8.2f %8d %8d %8.2f",date, cases,
       calculatedDoublingTime, actualDoublingDays,
@@ -1415,7 +1415,9 @@ Assessment Planning Tool</a>
       iey = iey + 1
     end
   end 
-  o:write("\n</ol><p><a href=index.html>Return to top</a><p>\n")
+  o:write("\n</ol>\n")
+  o:write("<i>Note: Only counties with 1,000 or more cases are listed</i>\n")
+  o:write("<p><a href=index.html>Return to top</a><p>\n")
   o:write(showCopyright())
   o:write("\n</div></body></html>\n")
   o:close()
@@ -1452,6 +1454,8 @@ Assessment Planning Tool</a>
   o:write("growth</a>")
   o:write("<br>\n")
   o:write("<a href=statesByDeaths100k.html>States by deaths per 100,000</a>")
+  o:write("<p>\n")
+  o:write("<a href=countyByGrowth.html>Counties sorted by COVID-19 growth</a>")
   o:write("<p>\n")
   o:write("<a href=redStates.html>COVID-19 daily growth for all states ")
   o:write("with a Republican governor</a> (")
