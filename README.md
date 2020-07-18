@@ -60,6 +60,19 @@ mv foo GNUplot/index.html
 The Lua script makes the .html files and the files needed to make
 the PNG graphs.  Gnuplot makes the actual PNG files.
 
+# The web site
+
+The `maps.gnuplot` and the `.csv` files are not needed on the actual
+web site.  Only the `.html`, `.png`, and one `.svg` file are needed.
+The files make a static web site which can be hosted by almost any
+web server.  The web site is about 170 megabytes in size (all of those
+`.png` graphs for each and every county in the United States add up).
+
+To view the created web site, one can open up `GNUplot/index.html` using
+any modern browser from the mid-2010s or later; the website will work
+with Internet Explorer if the `.svg` file is converted in to a `.png`
+file.
+
 # Making a SVG map
 
 To make a SVG map of the data, make sure one has Git and the 
