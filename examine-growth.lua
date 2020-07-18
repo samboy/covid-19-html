@@ -61,11 +61,18 @@ function processCOVIDtable(ourCOVIDtable, useDeaths)
       -- Calculate the yesterday and average daily increase in cases
       today.delta = today.cases - here.last
       here.deltaList[here.n % g_dayrange] = today.delta
+      here.delta14List[here.n % 14] = today.delta
       today.deltaSum = 0
       for a = 0, g_dayrange do
         if here.deltaList[a] then
           today.deltaSum = today.deltaSum + here.deltaList[a]
         end 
+      end
+      today.delta14Sum = 0
+      for a = 0, 13 do
+        if here.delta14List[a] then
+          today.delta14Sum = today.delta14Sum + here.delta14List[a]
+        end
       end
       if g_dayrange > 0 then
         today.deltaAverage = today.deltaSum / g_dayrange
@@ -84,6 +91,7 @@ function processCOVIDtable(ourCOVIDtable, useDeaths)
       -- Cases per 100,000 people
       if here.pop and here.pop > 0 then
         today.casesPer100k = (today.cases / here.pop) * 100000
+        today.delta14capita = (today.delta14Sum / here.pop) * 100000
         if today.casesPer100k > maxCasesPer100k then
           maxCasesPer100k = today.casesPer100k
         end
@@ -252,6 +260,7 @@ covidData = {}
 -- Initialize a given location's data
 function initPlaceData() 
   out = { casesHistory = {}, rollingAverage = {}, deltaList = {},
+          delta14List = {},
 	  n = 0, hadHalf = 1, last = 0, date = {} }
   return out;
 end
@@ -287,6 +296,10 @@ end
 --               (accounting field for calculations)
 -- rollingAverage: Used to determine the (usually) 7-day average growth
 -- deltaList: Used to determine the 7-day average of new cases
+--
+-- delta14List: Used to determine the 14-day amount of new cases per 100k
+-- (California uses this number for their COVID-19 calculations)
+--
 -- n: Used with rollingAverage and deltaList to know which index to fetch
 --    on a given day (another accounting field for calculations)
 -- hadHalf: When we last saw 1/2 the cases (accounting field)
@@ -522,12 +535,12 @@ end
 function makeString(outputFormat,
         date, cases,calculatedDoublingTime,actualDoublingDays,
         delta, deltaAverage, casesPer100k, herdImmunityCalc,
-        averageGrowth)
+        averageGrowth, delta14capita)
   if outputFormat == "csv" then
-    return string.format("%s,%f,%d,%d,%.2f,%.2f,%.2f",date, 
+    return string.format("%s,%f,%d,%d,%.2f,%.2f,%.2f,%.2f",date, 
       calculatedDoublingTime,
       actualDoublingDays, cases, casesPer100k, herdImmunityCalc,
-      (averageGrowth - 1) * 100)
+      (averageGrowth - 1) * 100, delta14capita)
   else
     return string.format("%s %8d %8.2f %8d %8d %8.2f",date, cases,
       calculatedDoublingTime, actualDoublingDays,
@@ -569,7 +582,8 @@ if arg[1] == 'cases' or arg[1] == 'csv' then
                       data.actualDoublingDays, data.delta, 
                       data.deltaAverage, data.casesPer100k, 
                       data.herdImmunityCalc or -1,
-                      data.averageGrowth)
+                      data.averageGrowth,
+                      data.delta14capita or -1)
     print(line)
   end
   os.exit(0)
@@ -1016,6 +1030,11 @@ content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0"
   if here.mostRecent and here.mostRecent.casesPer100k then
     o:write("<br>" .. caseStrU .. " Per 100,000: " .. 
     humanNumber(here.mostRecent.casesPer100k) 
+    .. "\n")
+  end
+  if here.mostRecent and here.mostRecent.delta14capita then 
+    o:write("<br>" .. caseStrU .. " 14-day per 100k: " .. 
+    humanNumber(here.mostRecent.delta14capita)
     .. "\n")
   end
   if here.mostRecent and here.mostRecent.deltaAverage then
