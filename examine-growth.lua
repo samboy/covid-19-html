@@ -1296,6 +1296,7 @@ growth; green means slow growth.
   o:write("<a href=SiteMap.html>A site map is available</a>\n")
   o:write([=[<h1>See also</h1>
 <ul>
+<li><a href=https://covidtracking.com/>CovidTracking.com</a>
 <li><a href=https://www.nytimes.com/interactive/2020/us/coronavirus-us-cases.html
 >NY Times interactive map showing per-county COVID-19 growth</a><br>
 <li><a href=https://coronavirus.jhu.edu/us-map>John Hopkins Coronavirus Resource Center</a><br>
