@@ -1073,6 +1073,20 @@ is <i>calculated</i> doubling time: The number of days, based on 7-day
 average growth, for cases to double.  The green line is <i>actual</i>
 doubling time: How many days ago did we have half the number of cases.
 In both cases, the higher the line, the slower the COVID-19 growth.<p>]=])
+  -- Explain each and every figure in the above table.
+  o:write([=[<i>]=]..caseStrU..[=[</i> is total COVID-19 ]=]
+  ..caseStrL.. [=[; <i>]=]..caseStrL..[=[ per 100,000</i> is ]=]
+  ..caseStrL.. [=[ per 100,000 people; <i>]=]..caseStrL..[=[ 14-day per
+  100k</i> is the total number of ]=] ..caseStrL.. [=[ over the last 14 
+  days, added together, then multiplied by 100,000, then divided by the 
+  population. <i>New ]=]..caseStrL..[=[</i> is the number of ]=] 
+  ..caseStrL.. [=[ we have had per day on average over the last seven 
+  days.  <i>Growth</i> is the increase in ]=] ..caseStrL.. [=[ compared 
+  to the previous number of ]=] ..caseStrL.. [=[; the number is a 7-day 
+  average.  <i>Doubling days</i> is the number of days it will take for 
+  ]=]..caseStrL..[=[ to double at the current growth rate (calculated), 
+  or the number of days in the past we have had half the current number 
+  of ]=] ..caseStrL.. " (actual).<p>\n")
 
   if state[place] and not isDeath then
     local countyList = {}
@@ -1093,7 +1107,7 @@ In both cases, the higher the line, the slower the COVID-19 growth.<p>]=])
       local fCountyName = filenameCorrect(county)
       o:write('<a href="' .. fCountyName .. '.html">' .. humanCounty(county)
                .. "</a>")
-      o:write(' Growth rate: ' ..  growFormat .. "%<br>\n")
+      o:write(' Growth: ' ..  growFormat .. "%<br>\n")
     end
     o:write('<p><a href="USA.html">Return to USA</a> - ' .. "\n")
     o:write('<a href="index.html">Return to top</a> - ' .. "\n")
@@ -1184,10 +1198,10 @@ if arg[1] == "gnuplot" or arg[1] == "website" or arg[1] == "webquick" then
     local dFormat = humanNumber((dGrowth - 1) * 100)
     stateHTMLlist = stateHTMLlist .. 
         '<a href="' .. stateN .. '.html">' .. stateN .. "</a>" ..
-        ' Growth rate: ' ..  growFormat .. "%<br>\n"
+        ' Growth: ' ..  growFormat .. "%<br>\n"
     stateDeathHTMLlist = stateDeathHTMLlist .. 
         '<a href="' .. stateN .. '-deaths.html">' .. stateN .. "</a>" ..
-        ' Growth rate: ' ..  dFormat .. "%<br>\n"
+        ' Growth: ' ..  dFormat .. "%<br>\n"
   end
   local idx = 1
   for stateN,growth in sPairs(growthByState, sortedByRevValue) do
@@ -1195,7 +1209,7 @@ if arg[1] == "gnuplot" or arg[1] == "website" or arg[1] == "webquick" then
       local growFormat = humanNumber((growth - 1) * 100)
       stateHotSpots = stateHotSpots .. 
         '<a href="' .. stateN .. '.html">' .. stateN .. "</a>" ..
-        ' Growth rate: ' ..  growFormat .. "%<br>\n"
+        ' Growth: ' ..  growFormat .. "%<br>\n"
     end
     idx = idx + 1
   end
@@ -1282,7 +1296,7 @@ growth; green means slow growth.
       local growFormat = humanNumber((growth - 1) * 100)
       o:write('<a href="' .. countyN .. '.html">' .. humanCounty(countyN)
          .. "</a>" ..
-        ' Growth rate: ' ..  growFormat .. "%<br>\n")
+        ' Growth: ' ..  growFormat .. "%<br>\n")
       iex = iex + 1
     end
   end 
@@ -1421,7 +1435,7 @@ Assessment Planning Tool</a>
       local growFormat = humanNumber((growth - 1) * 100)
       o:write('<li><a href="' .. countyN .. '.html">' .. 
         humanCounty(countyN) .. "</a>" ..
-        ' Growth rate: ' ..  growFormat .. "%<br>\n")
+        ' Growth: ' ..  growFormat .. "%<br>\n")
       iey = iey + 1
     end
   end 
