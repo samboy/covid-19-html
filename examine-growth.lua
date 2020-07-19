@@ -1256,7 +1256,7 @@ content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0"
     humanNumber(covidDeaths.USA.mostRecent.deaths, ",", "%d") .. " (" ..
     humanNumber(covidDeaths.USA.mostRecent.casesPer100k) .. " per 100,000)<p>")
   o:write([=[
-<i>This is a map showing COVID-19 growth.  Red means fast (5% or higher)
+<i>This is a map showing COVID-19 growth.  Red means fast (4% or higher)
 growth; green means slow growth.
 </i>
 <p>
