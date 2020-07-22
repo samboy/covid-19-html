@@ -1,5 +1,8 @@
 #!/usr/bin/env lua-5.1
 
+-- This will work with Lua 5.4 as well as LuaJIT 2.1.0-beta3 (Lua 5.1 
+-- compatible), and pretty much anything in between
+
 require("LUAstuff")
 require("stateNameAbbr")
 require("governors")
