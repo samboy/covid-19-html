@@ -17,7 +17,8 @@ cd ..
 # Anything below this line is optional
 
 # ImageMagick or Inkscape needed to do svg -> png conversion
-inkscape GNUplot/hotSpots.svg --export-png=GNUplot/hotSpots.png
+rm -f GNUplot/hotSpots.png
+inkscape GNUplot/hotSpots.svg --export-png=GNUplot/hotSpots.png >/dev/null 2>&1
 if [ ! -e GNUplot/hotSpots.png ] ; then 
 	convert -depth 8 GNUplot/hotSpots.svg GNUplot/hotSpots.png
 fi
