@@ -11,7 +11,8 @@ require("USmap")
 ---------------------------------------------------------------------------
 -- Human name for county,state
 function humanCounty(i)
-  return string.gsub(i,",",", ")
+  out, rest = string.gsub(i,",",", ")
+  return out
 end
 
 ---------------------------------------------------------------------------
