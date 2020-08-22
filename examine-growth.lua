@@ -780,7 +780,7 @@ function pageStyle()
         .page { width: 640px; margin-left: auto; margin-right: auto;
                 font-size: 18px; }
 }
-body { font-family: Helvetica Neue, Helvetica, Arial, sans-serif; 
+body { font-family: Arial, Helvetica Neue, Helvetica, sans-serif; 
        overflow-y: scroll; }
 a {
         color: #258723;
