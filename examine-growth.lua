@@ -928,8 +928,8 @@ function makeAPage(place, here, growthByCounty, stateHTMLlist, dir, isDeath,
     if calculatedDoublingTime > data.cases then
       calculatedDoublingTime = data.cases
     end
-    if calculatedDoublingTime > 100 then
-      calculatedDoublingTime = 100
+    if calculatedDoublingTime > 200 then
+      calculatedDoublingTime = 200
     end
     local line = makeString("csv",
                     date, data.cases, calculatedDoublingTime,
