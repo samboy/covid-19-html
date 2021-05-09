@@ -1267,6 +1267,12 @@ content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0"
   o:write("<body>\n<div class=page>\n")
   o:write(buttonBarToplevel())
   o:write("<h1>COVID-19 in the USA</h1>\n")
+  o:write([=[<!--<b>Important note: This website is no longer being updated 
+as of {{date}}</b>.  While COVID-19 continues to be a concern, with vaccines
+widely available, growth has (in the USA at least) decreased to the point
+COVID-19 is no longer the overriding concern it was in 2020.  Society is
+slowly opening up again and we are getting closer to a post-pandemic
+world every day.-->]=])
   o:write("\nCases: " ..
     humanNumber(covidCases.USA.mostRecent.cases, ",", "%d") .. " (" ..
     humanNumber(covidCases.USA.mostRecent.casesPer100k) .. " per 100,000)<br>")
