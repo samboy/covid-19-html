@@ -534,7 +534,8 @@ end
 -- Header string for tabulated output
 function makeHeaderString(outputFormat)
   if outputFormat == "csv" then return
-"Date,Doubling time (calculated days),Doubling time (actual days),Cases," ..
+--"Date,Doubling time (calculated days),Doubling time (actual days),Cases," ..
+"Date,New cases (7-day average),Cases," ..
 "Growth percentage"
   else return
     "Date          Cases   Doubling time        New daily cases"
@@ -547,7 +548,8 @@ function makeString(outputFormat,
         delta, deltaAverage, casesPer100k, herdImmunityCalc,
         averageGrowth, delta14capita)
   if outputFormat == "csv" then
-    return string.format("%s,%f,%d,%d,%.2f,%.2f,%.2f,%.2f",date, 
+    return string.format("%s,%.2f,%f,%d,%d,%.2f,%.2f,%.2f,%.2f",date, 
+      deltaAverage or 0,
       calculatedDoublingTime,
       actualDoublingDays, cases, casesPer100k, herdImmunityCalc,
       (averageGrowth - 1) * 100, delta14capita or -1)
@@ -587,6 +589,8 @@ if arg[1] == 'cases' or arg[1] == 'csv' then
 
   print(makeHeaderString(g_outputFormat))
   for date, data in sPairs(here.date) do
+    -- Note that makeString outputs columns in a different form
+    -- then the order of arguments here
     line = makeString(g_outputFormat,
                       date, data.cases, data.calculatedDoublingTime,
                       data.actualDoublingDays, data.delta, 
@@ -973,8 +977,8 @@ set xlabel "Date]=])
   gFileHandle:write("\n")
   gFileHandle:write([=[
 plot "]=] .. fname .. 
--- ".csv" .. '"' .. " using 1:2 with lines lw 4, '' using 1:3 with lines lw 4\n")
-".csv" .. '"' .. " using 1:4 with lines lw 4\n")
+-- ".csv" .. '"' .. " using 1:3 with lines lw 4, '' using 1:4 with lines lw 4\n")
+".csv" .. '"' .. " using 1:2 with lines lw 4\n")
   -- o:close()
 
   ------------------------------------------------------------------------
