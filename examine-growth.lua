@@ -953,8 +953,10 @@ function makeAPage(place, here, growthByCounty, stateHTMLlist, dir, isDeath,
   gFileHandle:write("set terminal pngcairo size 960,540 enhanced font '" ..
            fontnameSize .. "'\n")
   gFileHandle:write("set output '" .. fname .. ".png'\n")
-  local dtime = "doubling time"
-  if isDeath then dtime = "doubling time for deaths" end
+  -- local dtime = "doubling time"
+  local dtime = "new cases"
+  -- if isDeath then dtime = "doubling time for deaths" end
+  if isDeath then dtime = "new deaths" end
   if here.mostRecentDate then
     gFileHandle:write("set title 'COVID-19 " ..dtime.. " for " .. gname ..
             " as of " .. here.mostRecentDate .. "'\n")
@@ -966,12 +968,13 @@ function makeAPage(place, here, growthByCounty, stateHTMLlist, dir, isDeath,
 set xdata time
 set timefmt "%Y-%m-%d"
 set key left autotitle columnhead
-set ylabel "Doubling Time"
+set ylabel "New"
 set xlabel "Date]=])
   gFileHandle:write("\n")
   gFileHandle:write([=[
 plot "]=] .. fname .. 
-".csv" .. '"' .. " using 1:2 with lines lw 4, '' using 1:3 with lines lw 4\n")
+-- ".csv" .. '"' .. " using 1:2 with lines lw 4, '' using 1:3 with lines lw 4\n")
+".csv" .. '"' .. " using 1:4 with lines lw 4\n")
   -- o:close()
 
   ------------------------------------------------------------------------
