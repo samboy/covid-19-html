@@ -1078,12 +1078,12 @@ content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0"
             "\n")
   end 
   o:write("<p>\n")
-  o:write([=[The above graph shows <i>doubling time</i>, i.e. the number
-of days it takes for ]=] ..caseStrL .. [=[ to double.  The purple line
+  o:write([=[The above graph shows <i>new cases</i>, i.e. the number
+of new ]=] ..caseStrL .. [=[ we have seen.  <!--The purple line
 is <i>calculated</i> doubling time: The number of days, based on 7-day
 average growth, for cases to double.  The green line is <i>actual</i>
 doubling time: How many days ago did we have half the number of cases.
-In both cases, the higher the line, the slower the COVID-19 growth.<p>]=])
+In both cases, the higher the line, the slower the COVID-19 growth.--><p>]=])
   -- Explain each and every figure in the above table.
   o:write([=[<i>]=]..caseStrU..[=[</i> is total COVID-19 ]=]
   ..caseStrL.. [=[; <i>]=]..caseStrL..[=[ per 100,000</i> is ]=]
