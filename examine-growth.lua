@@ -101,6 +101,7 @@ function processCOVIDtable(ourCOVIDtable, useDeaths)
       -- Cases per 100,000 people
       if here.pop and here.pop > 0 then
         today.casesPer100k = (today.cases / here.pop) * 100000
+        today.newCasesPer100k = (today.deltaAverage / here.pop) * 100000
         today.delta14capita = (today.delta14Sum / here.pop) * 100000
         if today.casesPer100k > maxCasesPer100k then
           maxCasesPer100k = today.casesPer100k
@@ -229,6 +230,7 @@ if arg[1] == "svg" then
      g_field ~= "actualDoublingDays" and
      g_field ~= "calculatedDoublingTime" and
      g_field ~= "casesPer100k" and
+     g_field ~= "newCasesPer100k" and
      g_field ~= "casesPer100kLog" and
      g_field ~= "herdImmunityCalc" then
     print("Invalid field to view for SVG map")
@@ -1254,7 +1256,8 @@ if arg[1] == "gnuplot" or arg[1] == "website" or arg[1] == "webquick" then
 
   -- First, make a SVG file
   local o = io.open(dir .. "hotSpots.svg", "w")
-  o:write(makeSVG(covidCases,"averageGrowth",1.04,1.00))
+  -- o:write(makeSVG(covidCases,"averageGrowth",1.04,1.00))
+  o:write(makeSVG(covidCases,"newCasesPer100k",50,0))
   o:close()
   
   local o = io.open(dir .. "index.html", "w")
