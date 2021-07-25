@@ -1290,8 +1290,9 @@ world every day.-->]=])
     humanNumber(covidDeaths.USA.mostRecent.deaths, ",", "%d") .. " (" ..
     humanNumber(covidDeaths.USA.mostRecent.casesPer100k) .. " per 100,000)<p>")
   o:write([=[
-<i>This is a map showing COVID-19 growth.  Red means fast (4% or higher)
-growth; green means slow growth.
+<i>This is a map showing COVID-19 daily new cases (7-day average).  
+Red means many (50 per 100,000 population or higher)
+new cases; green means fewer new cases.
 </i>
 <p>
 <a href="hotSpots.svg"><img src="hotSpots.svg" width=100%></a><br>]=])
