@@ -1060,6 +1060,10 @@ content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0"
     o:write("<br>New " ..caseStrL.. " (7-day average): " .. 
             humanNumber(here.mostRecent.deltaAverage) .. "\n")
   end
+  if here.mostRecent and here.mostRecent.newCasesPer100k then
+    o:write("<br>New " ..caseStrL.. " per 100k: " .. 
+            humanNumber(here.mostRecent.newCasesPer100k) .. "\n")
+  end
   if here.mostRecent and here.mostRecent.averageGrowth then
     o:write("<br>Growth: " .. 
             humanNumber((here.mostRecent.averageGrowth - 1) * 100) ..
