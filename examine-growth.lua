@@ -537,8 +537,9 @@ end
 function makeHeaderString(outputFormat)
   if outputFormat == "csv" then return
 --"Date,Doubling time (calculated days),Doubling time (actual days),Cases," ..
-"Date,New cases (7-day average),Cases," ..
-"Growth percentage"
+    "Date,New cases (7-day average),Cases,Growth percentage"
+  elseif outputFormat == "csvDeaths" then 
+    return "Date,New deaths (7-day average),Deaths,Growth percentage"
   else return
     "Date          Cases   Doubling time        New daily cases"
   end
@@ -927,7 +928,11 @@ function makeAPage(place, here, growthByCounty, stateHTMLlist, dir, isDeath,
     print("Error opening " .. dir .. fname .. ".csv")
     os.exit(1)
   end
-  o:write(makeHeaderString("csv"))
+  if isDeath then
+    o:write(makeHeaderString("csvDeaths"))
+  else
+    o:write(makeHeaderString("csv"))
+  end
   o:write("\n")
   for date, data in sPairs(here.date) do
     local calculatedDoublingTime = data.calculatedDoublingTime
