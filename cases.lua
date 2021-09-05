@@ -15,7 +15,7 @@ isVacAndAsymp = 0
 notVax = 0
 unknown = 0
 for a=1,#links do 
-  i=links[a]["infectee"] 
+  i=links[a]["infector"] 
   c = cFind[i]
   if c and c["vaccinated"] and c["vaccinated"]:find("2 dose") then 
     isVac = isVac+1
