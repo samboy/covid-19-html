@@ -17,8 +17,9 @@ for a=1,#cases do
 end
 
 -- Now, let's count vaccinated and unvaccinated
-isVac = 0
-isVacAndAsymp = 0
+isFullVax = 0
+isFullVaxAndAsymp = 0
+isSomeVax = 0
 notVax = 0
 unknown = 0
 for a=1,#links do 
@@ -27,11 +28,13 @@ for a=1,#links do
   -- If they have two doses, they're vaccinated
   -- (Does Singapore use the J&J vaccine)
   if c and c["vaccinated"] and c["vaccinated"]:find("2 dose") then 
-    isVac = isVac+1
-    -- Let's count the vaccinated + asymptomatic ones
+    isFullVax = isFullVax+1
+    -- Let's count the fully vaccinated + asymptomatic ones
     if c["asymptomatic"] and c["asymptomatic"]:find("y") then 
-      isVacAndAsymp =isVacAndAsymp +1 
+      isFullVaxAndAsymp =isFullVaxAndAsymp +1 
     end
+  elseif c and c["vaccinated"] and c["vaccinated"]:find("partial") then
+    isSomeVax = isSomeVax + 1 
   else
     -- If not vaccinated twice, we count it as unvaccinated
     if c then notVax = notVax + 1
@@ -41,7 +44,8 @@ for a=1,#links do
 end
 
 -- Print tallies
-print("isvac", isVac)
-print("isVacAndAsymp", isVacAndAsymp)
+print("isFullvax", isFullVax)
+print("isVaxAndAsymp", isFullVaxAndAsymp)
+print("isSomevax", isSomeVax)
 print("notVax", notVax)
 print("unknown", unknown)
