@@ -26,7 +26,7 @@ for a=1,#links do
   i=links[a]["infector"] 
   c = cFind[i]
   -- If they have two doses, they're vaccinated
-  -- (Does Singapore use the J&J vaccine)
+  -- (Singapore doesn't use the J&J vaccine)
   if c and c["vaccinated"] and c["vaccinated"]:find("2 dose") then 
     isFullVax = isFullVax+1
     -- Let's count the fully vaccinated + asymptomatic ones
