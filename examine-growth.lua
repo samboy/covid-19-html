@@ -356,7 +356,8 @@ for place, here in sPairs(covidData) do
   -- But, should that ever change....
   if stateColor ~= "red" and stateColor ~= "blue" then
     print("No color for state " .. here.state .. "\n")
-    os.exit(1)
+    -- os.exit(1)
+    stateColor = "blue" -- To avoid the program crashing
   end
 
   if not stateByGov[stateColor] then
