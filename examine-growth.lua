@@ -999,7 +999,7 @@ plot "]=] .. fname ..
   if isDeath then
     o:write("<html><head><title>COVID-19 deaths for ")
   else
-    o:write("<html><head><title>COVID-19 doubling time for ")
+    o:write("<html><head><title>COVID-19 cases for ")
   end
   o:write(humanCounty(place))
   o:write("</title>\n")
